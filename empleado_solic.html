@@ -1,0 +1,231 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Agregar los estilos de Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex size-full min-h-screen flex-col justify-between group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+<div class="flex flex-col">
+<header class="flex items-center p-4">
+<button id="back-button" class="text-gray-700">
+<span class="material-symbols-outlined"> arrow_back_ios_new </span>
+</button>
+<h1 class="text-xl font-bold text-gray-900 flex-1 text-center pr-8">Solicitud de Horas Extras</h1>
+</header>
+<main class="flex-1 px-4 py-8">
+<form class="space-y-6" id="solicitud-form">
+<div id="status-message" class="hidden text-sm text-center p-3 rounded-md"></div>
+<div>
+  
+  <label class="block text-sm font-medium text-gray-700 mb-1" for="obra">
+  Obra / Sub Obra *
+</label>
+<select id="obra" name="obra"
+  class="form-select w-full rounded-lg border-gray-300 py-3 pl-3 pr-10 text-gray-900 focus:border-red-500 focus:ring-red-500">
+</select>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="sector">Sector *</label>
+<div class="relative">
+<select class="form-select w-full rounded-lg border-gray-300 py-3 pl-10 pr-4 text-gray-900 focus:border-red-500 focus:ring-red-500" id="sector" name="sector" required>
+<option value="" disabled selected>Cargando sectores...</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-gray-400"> maps_home_work </span>
+</div>
+</div>
+</div>
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1" for="fecha">
+    Fecha *
+  </label>
+  <div class="relative">
+    <input
+      id="fecha"
+      name="fecha"
+      type="text"
+      placeholder="Seleccionar fecha"
+      class="form-input w-full rounded-lg border-gray-300 py-3 pl-10 pr-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500"
+      required
+    />
+    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+      <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+    </div>
+  </div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="horas">Horas a cargar *</label>
+<div class="relative">
+<input class="form-input w-full rounded-lg border-gray-300 py-3 pl-10 pr-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500" id="horas" name="horas" type="text" required/>
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-gray-400"> schedule </span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="razon">Motivo</label>
+<div class="relative">
+<input class="form-input w-full rounded-lg border-gray-300 py-3 pl-10 pr-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500" id="razon" name="razon" placeholder="Ej. Proyecto urgente" type="text"/>
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-gray-400"> edit_note </span>
+</div>
+</div>
+</div>
+</form>
+</main>
+</div>
+<footer class="p-4">
+<button type="submit" form="solicitud-form" id="enviar" class="w-full cursor-pointer items-center justify-center rounded-lg bg-[#ea2a33] py-4 px-5 text-center text-base font-bold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+<span class="truncate">Enviar Solicitud</span>
+</button>
+</footer>
+</div>
+
+<!-- Scripts necesarios para seleccionar fecha y lógica de formulario -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const obraSelect = document.getElementById('obra');
+  const sectorSelect = document.getElementById('sector');
+  const form = document.getElementById('solicitud-form');
+  const statusMessage = document.getElementById('status-message');
+
+  // --- Inicializar fechas y horas ---
+  flatpickr("#fecha", {
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d/m/Y",
+    allowInput: true,
+  });
+
+  flatpickr("#horas", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true
+  });
+
+  // --- Cargar obras y subobras en select jerárquico ---
+  try {
+    const resObras = await fetch('/api/obras-jerarquia');
+    const dataObras = await resObras.json();
+
+    obraSelect.innerHTML = '<option value="">Seleccionar...</option>';
+
+    dataObras.forEach(obra => {
+      const group = document.createElement('optgroup');
+      group.label = obra.obra;
+
+      if (obra.subobras && obra.subobras.length > 0) {
+        obra.subobras.forEach(sub => {
+          const option = document.createElement('option');
+          option.value = sub.id_sistema;           // ID de subobra
+          option.dataset.parent = obra.id_sistema; // ID de obra principal
+          option.textContent = `↳ ${sub.obra}`;
+          group.appendChild(option);
+        });
+      } else {
+        const option = document.createElement('option');
+        option.value = obra.id_sistema; // ID de obra principal
+        option.dataset.parent = '';     // No tiene parent
+        option.textContent = obra.obra;
+        group.appendChild(option);
+      }
+
+      obraSelect.appendChild(group);
+    });
+  } catch (err) {
+    console.error('Failed to load obras', err);
+  }
+
+  // --- Cargar sectores ---
+  try {
+    const resSectores = await fetch('/api/sectores');
+    const sectores = await resSectores.json();
+    sectorSelect.innerHTML = '<option value="" disabled selected>Seleccionar sector</option>';
+    sectores.forEach(sector => {
+      const option = new Option(sector.sector, sector.id_sistema);
+      sectorSelect.add(option);
+    });
+  } catch (err) {
+    console.error('Failed to load sectores', err);
+  }
+
+  // --- Manejar envío de formulario ---
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // --- Leer selección de obra/subobra ---
+    const selectedOption = obraSelect.options[obraSelect.selectedIndex];
+    if (!selectedOption || selectedOption.value === "") {
+      data.obraid = null;
+      data.subobraid = null;
+    } else if (selectedOption.dataset.parent) {
+      // Es una subobra
+      data.obraid = parseInt(selectedOption.dataset.parent);
+      data.subobraid = parseInt(selectedOption.value);
+    } else {
+      // Es obra principal
+      data.obraid = parseInt(selectedOption.value);
+      data.subobraid = null;
+    }
+
+    try {
+      const response = await fetch('/api/solicitar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+
+      if (response.ok && result.success) {
+        statusMessage.textContent = 'Solicitud enviada con éxito. Redirigiendo...';
+        statusMessage.classList.add('bg-green-100', 'text-green-700');
+        form.reset();
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 2000);
+      } else {
+        statusMessage.textContent = result.message || 'Error al enviar la solicitud.';
+        statusMessage.classList.add('bg-red-100', 'text-red-700');
+      }
+    } catch (error) {
+      statusMessage.textContent = 'No se pudo conectar con el servidor.';
+      statusMessage.classList.add('bg-red-100', 'text-red-700');
+    }
+
+    statusMessage.classList.remove('hidden');
+  });
+
+  // --- Botón volver ---
+  document.getElementById('back-button').addEventListener('click', () => {
+    window.location.href = '/dashboard';
+  });
+});
+</script>
+
+
+</body></html>
