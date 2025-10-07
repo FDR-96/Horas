@@ -1,277 +1,152 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="es">
+<head>
 <meta charset="utf-8"/>
 <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
-<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;700;800" onload="this.rel='stylesheet'" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <title>Stitch Design</title>
-<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <style>
 body {
   min-height: 100dvh;
   font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
-  color: #1f2937; /* slate-800 */
   background-color: #f9fafb;
+  color: #1f2937;
 }
 
-/* ====== TEXTOS BASE ====== */
-h1 {
-  font-size: clamp(2rem, 5vw, 2.6rem);
-  font-weight: 800;
-  line-height: 1.2;
+/* ====== FLUID TEXT ====== */
+@layer utilities {
+  .text-fluid-2xl { font-size: clamp(1.5rem, 5vw, 1.8rem); }
+  .text-fluid-xl  { font-size: clamp(1.25rem, 4vw, 1.5rem); }
+  .text-fluid-lg  { font-size: clamp(1.125rem, 3.5vw, 1.15rem); }
+  .text-fluid-base{ font-size: clamp(1.2rem, 3vw, 1.5rem); }
+  .text-fluid-sm  { font-size: clamp(1rem, 2.5vw, 1.25rem); }
 }
-
-h2 {
-  font-size: clamp(1.6rem, 4.5vw, 2.1rem);
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-p, a, span, button, div {
-  font-size: clamp(1.15rem, 3.5vw, 1.35rem);
-  line-height: 1.6;
-}
-
-/* ====== TEXTOS SECUNDARIOS ====== */
-.text-sm {
-  font-size: clamp(1.1rem, 3vw, 1.2rem) !important;
-}
-
-.text-base {
-  font-size: clamp(1.2rem, 3.5vw, 1.35rem) !important;
-}
-
-.text-lg {
-  font-size: clamp(1.35rem, 4vw, 1.45rem) !important;
-}
-
-.text-xl {
-  font-size: clamp(1.5rem, 4.5vw, 1.7rem) !important;
-}
-
-.text-3xl {
-  font-size: clamp(2rem, 6vw, 2.6rem) !important;
-}
-
-/* ====== ICONOS ====== */
-.material-symbols-outlined {
-  font-size: clamp(2.2rem, 5.5vw, 2.6rem);
-  vertical-align: middle;
-}
-
-/* ====== HEADER ====== */
-header {
-  padding: 1.5rem 1rem;
-}
-
-#usuario {
-  font-size: clamp(1.4rem, 3.5vw, 1.7rem);
-  font-weight: 700;
-}
-
-#id_usuario {
-  font-size: clamp(1.15rem, 3vw, 1.3rem);
-  color: #6b7280;
-}
-
-/* ====== TARJETAS DE SOLICITUD ====== */
-#solicitudes_recientes .flex {
-  padding: clamp(1.25rem, 3.5vw, 1.75rem);
-  border-radius: 1.25rem;
-  gap: 1.25rem;
-}
-
-#solicitudes_recientes > div {
-  margin-bottom: 1rem;
-}
-
-#solicitudes_recientes p {
-  font-size: clamp(1.2rem, 3vw, 1.35rem);
-}
-
-/* ====== BOTÓN PRINCIPAL ====== */
-#solicitar {
-  font-size: clamp(1.25rem, 3.5vw, 1.45rem);
-  height: clamp(3.8rem, 9vw, 4.2rem);
-  border-radius: 0.85rem;
-  gap: 0.85rem;
-}
-
-/* ====== ESPACIADOS GENERALES ====== */
-main {
-  padding-bottom: 6rem;
-}
-
-footer {
-  padding: 1.25rem 1.5rem;
-}
-
 </style>
-
-
-  </head>
+</head>
 <body class="bg-gray-50">
-<div class="relative flex size-full min-h-screen flex-col bg-gray-50 justify-between group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
-<div class="flex flex-col">
-<header class="flex items-center p-4 pb-2 justify-between sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10">
-<button id="logout-button" class="text-slate-800 flex size-10 shrink-0 items-center justify-center rounded-full">
-<span class="material-symbols-outlined">logout</span>
-</button>
-<h1 class="text-slate-800 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Dashboard</h1>
-<div class="size-10"></div>
-</header>
-<main class="flex-1">
-<div class="p-4 @container">
-<div class="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between @[520px]:items-center">
-<div class="flex items-center gap-4">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-16 shrink-0" style='background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8t_9-O-1-cr_Uo_K-mCl-a-H-do-e-a-E-A&s");'></div>
-<div class="flex flex-col">
-<p class="text-slate-800 text-xl font-bold leading-tight tracking-tight" id="usuario">Cargando...</p>
-<p class="text-slate-500 text-sm font-normal leading-normal" id="id_usuario">ID Empleado: ...</p>
-</div>
-</div>
-</div>
-</div>
-<!--
-<div class="grid grid-cols-2 gap-4 p-4">
-<div class="flex flex-col gap-2 rounded-xl p-4 bg-white shadow-sm">
-<p class="text-slate-600 text-sm font-medium">Total de horas Pendientes</p>
-<p class="text-slate-900 text-3xl font-bold tracking-tight" id="total_horas">45</p>
-</div>
-<div class="flex flex-col gap-2 rounded-xl p-4 bg-white shadow-sm">
-<p class="text-slate-600 text-sm font-medium">Solicitudes pendientes</p>
-<p class="text-slate-900 text-3xl font-bold tracking-tight" id="solicitudes_pendientes">2</p>
-</div>
-</div> -->
-<div class="px-4 pt-5 pb-3 flex justify-between items-center">
-<h2 class="text-slate-800 text-lg font-bold leading-tight tracking-tight">Solicitudes cargadas</h2>
-<a class="text-[#F26722] text-sm font-bold" href="#">Ver todo</a>
-</div>
 
-<div class="flex flex-col gap-2 px-4" id="solicitudes_recientes">
-  <!-- Solicitudes se cargarán aquí dinámicamente -->
-</div>
+<div class="relative flex min-h-screen flex-col justify-between overflow-x-hidden">
+  <div class="flex flex-col">
+    <!-- HEADER -->
+    <header class="flex items-center p-4 pb-2 justify-between sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10">
+      <button id="logout-button" class="text-slate-800 flex w-10 h-10 items-center justify-center rounded-full">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+      <h1 class="text-fluid-2xl text-slate-800 font-bold leading-tight tracking-tight flex-1 text-center">Dashboard</h1>
+      <div class="w-10 h-10"></div>
+    </header>
 
-</main>
-</div>
-<footer class="sticky bottom-0 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
-<div class="flex justify-center p-4">
-<button id="solicitar" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-base font-bold leading-normal tracking-[0.015em] gap-2">
-<span class="material-symbols-outlined">add</span>
-<span>Solicitar horas</span>
-</button>
-</div>
-</footer>
+    <main class="flex-1 p-4">
+      <!-- PERFIL USUARIO -->
+      <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+        <div class="flex items-center gap-4">
+          <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-16 h-16 shrink-0" style='background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8t_9-O-1-cr_Uo_K-mCl-a-H-do-e-a-E-A&s");'></div>
+          <div class="flex flex-col">
+            <p id="usuario" class="text-fluid-xl font-bold leading-tight tracking-tight text-slate-800">Cargando...</p>
+            <p id="id_usuario" class="text-fluid-lg font-normal leading-normal text-slate-500">ID Empleado: ...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOLICITUDES -->
+      <div class="px-4 pt-5 pb-3 flex justify-between items-center">
+        <h2 class="text-fluid-xl font-bold leading-tight tracking-tight text-slate-800">Solicitudes cargadas</h2>
+        <a class="text-[#F26722] text-fluid-lg font-bold" href="#">Ver todo</a>
+      </div>
+
+      <div id="solicitudes_recientes" class="flex flex-col gap-2 px-4">
+        <!-- Solicitudes dinámicas se cargan aquí -->
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="sticky bottom-0 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
+    <div class="flex justify-center p-4">
+      <button id="solicitar" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-fluid-xl font-bold leading-normal tracking-[0.015em] gap-2">
+        <span class="material-symbols-outlined">add</span>
+        <span>Solicitar horas</span>
+      </button>
+    </div>
+  </footer>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Fetch user data
-        fetch('/api/user')
-            .then(response => response.json())
-            .then(data => {
-                if(data.nombre && data.id_usuario) {
-                    document.getElementById('usuario').textContent = data.nombre;
-                    document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
-                } else {
-                     window.location.href = '/login.html';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching user data:', error)
-                window.location.href = '/login.html';
-            });
-
-        // Fetch recent requests
-        fetch('/api/solicitudes')
-            .then(response => response.json())
-            .then(solicitudes => {
-                const container = document.getElementById('solicitudes_recientes');
-                let sumador_de_horas = 0;
-                let sumador_de_solicitudes = 0;
-                //const horas_totales = document.getElementById('total_horas');
-                //const solicitudes_pendientes = document.getElementById('solicitudes_pendientes');
-                //horas_totales.textContent  = `${sumador_de_horas}`;
-                //solicitudes_pendientes.textContent  =`${sumador_de_solicitudes}`;
-                container.innerHTML = ''; // Clear existing static content
-                if (solicitudes.length === 0) {
-                    container.innerHTML = '<p class="text-center text-slate-500">No hay solicitudes recientes.</p>';
-                    return;
-                }
-                
-                solicitudes.forEach(solicitud => {
-                    const statusInfo = getStatusInfo(solicitud.estado);
-                    const fecha = new Date(solicitud.fechacarga).toLocaleDateString();
-                    let horas = 'N/A';
-
-                    if (solicitud.horas_solicitadas) {
-                        const h = solicitud.horas_solicitadas.hours || 0;
-                        const m = solicitud.horas_solicitadas.minutes || 0;
-
-                        horas = `${h}h ${m}m`;
-                        
-                       if (solicitud.estado === "Pendiente") {
-                            sumador_de_solicitudes += 1;
-                                sumador_de_horas += h + m / 60;
-                        }
-                    }
-
-
-                    const solicitudElement = `
-                        <div class="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm">
-                            <div class="flex items-center justify-center size-10 ${statusInfo.bgColor} rounded-full">
-                                <span class="material-symbols-outlined ${statusInfo.textColor}">${statusInfo.icon}</span>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-slate-800 text-base font-medium leading-normal">${solicitud.nombre_obra}</p>
-                                <p class="text-slate-500 text-sm font-normal leading-normal">${statusInfo.text}</p>
-                            </div>
-                            <div class="shrink-0 text-right">
-                                <p class="text-slate-500 text-sm font-normal leading-normal">${fecha}</p>
-                                <p class="text-slate-800 text-sm font-medium">${horas}</p>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += solicitudElement;
-                });
-                //const horasEnterasTotales = Math.floor(sumador_de_horas);
-                //const minutosTotales = Math.round((sumador_de_horas - horasEnterasTotales) * 60);
-
-                //horas_totales.textContent = `${horasEnterasTotales}h ${minutosTotales}m`;
-               // solicitudes_pendientes.textContent = `${sumador_de_solicitudes}`;
-
-            })
-            .catch(error => console.error('Error fetching solicitudes:', error));
-    });
-
-    function getStatusInfo(status) {
-        switch (status.toLowerCase()) {
-            case 'aprobado':
-                return { icon: 'check', text: 'Aprobado', bgColor: 'bg-emerald-100', textColor: 'text-emerald-600' };
-            case 'rechazado':
-                return { icon: 'close', text: 'Rechazado', bgColor: 'bg-red-100', textColor: 'text-red-600' };
-            case 'solicitado':
-            default:
-                return { icon: 'pending', text: 'Pendiente', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' };
-        }
-    }
-
-    document.getElementById('solicitar').addEventListener('click', () => {
-        window.location.href = '/solicitar';
-    });
-
-    document.getElementById('logout-button').addEventListener('click', async () => {
-        try {
-            const response = await fetch('/logout', { method: 'POST' });
-            const result = await response.json();
-            if (result.success) {
-                window.location.href = '/login.html';
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/user')
+        .then(response => response.json())
+        .then(data => {
+            if(data.nombre && data.id_usuario) {
+                document.getElementById('usuario').textContent = data.nombre;
+                document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
+            } else {
+                 window.location.href = '/login.html';
             }
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-    });
+        })
+        .catch(() => window.location.href = '/login.html');
+
+    fetch('/api/solicitudes')
+        .then(response => response.json())
+        .then(solicitudes => {
+            const container = document.getElementById('solicitudes_recientes');
+            container.innerHTML = '';
+            if (!solicitudes.length) {
+                container.innerHTML = '<p class="text-center text-slate-500">No hay solicitudes recientes.</p>';
+                return;
+            }
+            solicitudes.forEach(solicitud => {
+                const statusInfo = getStatusInfo(solicitud.estado);
+                const fecha = new Date(solicitud.fechacarga).toLocaleDateString();
+                let horas = 'N/A';
+                if (solicitud.horas_solicitadas) {
+                    const h = solicitud.horas_solicitadas.hours || 0;
+                    const m = solicitud.horas_solicitadas.minutes || 0;
+                    horas = `${h}h ${m}m`;
+                }
+                container.innerHTML += `
+                  <div class="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-center w-10 h-10 ${statusInfo.bgColor} rounded-full">
+                      <span class="material-symbols-outlined ${statusInfo.textColor}">${statusInfo.icon}</span>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-fluid-xl font-medium text-slate-800 leading-normal">${solicitud.nombre_obra}</p>
+                      <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${statusInfo.text}</p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                      <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${fecha}</p>
+                      <p class="text-fluid-lg font-medium text-slate-800">${horas}</p>
+                    </div>
+                  </div>
+                `;
+            });
+        })
+        .catch(error => console.error(error));
+});
+
+function getStatusInfo(status) {
+    switch (status.toLowerCase()) {
+        case 'aprobado': return { icon: 'check', text: 'Aprobado', bgColor: 'bg-emerald-100', textColor: 'text-emerald-600' };
+        case 'rechazado': return { icon: 'close', text: 'Rechazado', bgColor: 'bg-red-100', textColor: 'text-red-600' };
+        default: return { icon: 'pending', text: 'Pendiente', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' };
+    }
+}
+
+document.getElementById('solicitar').addEventListener('click', () => {
+    window.location.href = '/solicitar';
+});
+
+document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/logout', { method: 'POST' });
+        const result = await response.json();
+        if (result.success) window.location.href = '/login.html';
+    } catch (error) {
+        console.error(error);
+    }
+});
 </script>
 
-</body></html>
+</body>
+</html>
