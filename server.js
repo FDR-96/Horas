@@ -93,6 +93,27 @@ app.get('/api/user', checkAuth, (req, res) => {
         id_usuario: req.session.user.id
     });
 });
+// Eliminar solicitud por ID
+app.delete('/api/solicitudes/:id', checkAuth, async (req, res) => {
+    const id = parseInt(req.params.id);
+    const personalId = req.session.user.id;
+
+    if(isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM public.horas WHERE id = $1 AND personalid = $2 RETURNING *',
+            [id, personalId]
+        );
+
+        if(result.rowCount === 0) return res.status(404).json({ message: 'Solicitud no encontrada' });
+
+        res.json({ success: true });
+    } catch(err) {
+        console.error('Error eliminando solicitud:', err);
+        res.status(500).json({ message: 'Error eliminando la solicitud' });
+    }
+});
 
 
 // Get recent requests for the logged-in user
@@ -101,6 +122,7 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
     try {
         const query = `
            SELECT
+                h.id,
                 h.estado,
                 -- Concatenamos obra y subobra si existe
                 CASE

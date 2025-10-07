@@ -284,16 +284,27 @@ const treeData = dataObras
     }
   });
 
-  $(treeContainer).on("select_node.jstree", (e, data) => {
-    const node = data.node;
-    if (node.children.length === 0) {
-      obraDropdown.value = node.text;
-      obraInput.value = node.id.split('-')[1];
-      treeContainer.classList.add('hidden');
-    } else {
-      $(treeContainer).jstree(true).toggle_node(node);
+$(treeContainer).on("select_node.jstree", (e, data) => {
+  const node = data.node;
+  const tree = $(treeContainer).jstree(true);
+
+  if (node.children.length === 0) { // es una hoja (subobra o obra sin hijos)
+    let displayText = node.text;
+
+    const parent = tree.get_parent(node); // id del padre
+    if (parent && parent !== "#") {
+      const parentNode = tree.get_node(parent);
+      displayText = parentNode.text + " / " + node.text; // obra/subobra
     }
-  });
+
+    obraDropdown.value = displayText;
+    obraInput.value = node.id.split('-')[1]; // id para envío
+    treeContainer.classList.add('hidden');
+  } else {
+    tree.toggle_node(node); // abrir/cerrar obra
+  }
+});
+
 
   // --- TomSelect ---
   const sectorSelect = new TomSelect("#sector", {

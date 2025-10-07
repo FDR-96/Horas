@@ -48,8 +48,14 @@ body {
             <p id="id_usuario" class="text-fluid-lg font-normal leading-normal text-slate-500">ID Empleado: ...</p>
           </div>
         </div>
+            <div class="flex justify-center p-4">
+        <button id="solicitar" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-fluid-xl font-bold leading-normal tracking-[0.015em] gap-2">
+            <span class="material-symbols-outlined">add</span>
+            <span>Solicitar horas</span>
+        </button>
+        </div>
       </div>
-
+     
       <!-- SOLICITUDES -->
       <div class="px-4 pt-5 pb-3 flex justify-between items-center">
         <h2 class="text-fluid-xl font-bold leading-tight tracking-tight text-slate-800">Obras cargadas</h2>
@@ -64,12 +70,7 @@ body {
 
   <!-- FOOTER -->
   <footer class="sticky bottom-0 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
-    <div class="flex justify-center p-4">
-      <button id="solicitar" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-fluid-xl font-bold leading-normal tracking-[0.015em] gap-2">
-        <span class="material-symbols-outlined">add</span>
-        <span>Solicitar horas</span>
-      </button>
-    </div>
+     
   </footer>
 </div>
 
@@ -97,30 +98,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             solicitudes.forEach(solicitud => {
-                const statusInfo = getStatusInfo(solicitud.estado);
-                const fecha = new Date(solicitud.fechacarga).toLocaleDateString();
-                let horas = 'N/A';
-                if (solicitud.horas_solicitadas) {
-                    const h = solicitud.horas_solicitadas.hours || 0;
-                    const m = solicitud.horas_solicitadas.minutes || 0;
-                    horas = `${h}h ${m}m`;
+    const statusInfo = getStatusInfo(solicitud.estado);
+    const fecha = new Date(solicitud.fechacarga).toLocaleDateString();
+    let horas = 'N/A';
+    if (solicitud.horas_solicitadas) {
+        const h = solicitud.horas_solicitadas.hours || 0;
+        const m = solicitud.horas_solicitadas.minutes || 0;
+        horas = `${h}h ${m}m`;
+    }
+
+    container.innerHTML += `
+      <div class="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm" data-id="${solicitud.id}">
+        <div class="flex items-center justify-center w-10 h-10 ${statusInfo.bgColor} rounded-full">
+          <span class="material-symbols-outlined ${statusInfo.textColor}">${statusInfo.icon}</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-fluid-xl font-medium text-slate-800 leading-normal">${solicitud.nombre_obra}</p>
+          <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${statusInfo.text}</p>
+        </div>
+        <div class="shrink-0 text-right">
+          <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${fecha}</p>
+          <p class="text-fluid-lg font-medium text-slate-800">${horas}</p>
+        </div>
+        <button class="delete-solicitud text-red-500 hover:text-red-700 ml-2">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+    `;
+    });
+
+    // --- Delegated event listener para eliminar ---
+    container.addEventListener('click', async (e) => {
+        if(e.target.closest('.delete-solicitud')) {
+            const card = e.target.closest('[data-id]');
+            const id = card.dataset.id;
+            if(confirm('¿Desea eliminar esta solicitud?')) {
+                try {
+                    const res = await fetch(`/api/solicitudes/${id}`, { method: 'DELETE' });
+                    const result = await res.json();
+                    if(res.ok && result.success) {
+                        card.remove();
+                        alert('Solicitud eliminada correctamente.');
+                    } else {
+                        alert(result.message || 'Error eliminando la solicitud.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('No se pudo conectar con el servidor.');
                 }
-                container.innerHTML += `
-                  <div class="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm">
-                    <div class="flex items-center justify-center w-10 h-10 ${statusInfo.bgColor} rounded-full">
-                      <span class="material-symbols-outlined ${statusInfo.textColor}">${statusInfo.icon}</span>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-fluid-xl font-medium text-slate-800 leading-normal">${solicitud.nombre_obra}</p>
-                      <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${statusInfo.text}</p>
-                    </div>
-                    <div class="shrink-0 text-right">
-                      <p class="text-fluid-lg font-normal text-slate-500 leading-normal">${fecha}</p>
-                      <p class="text-fluid-lg font-medium text-slate-800">${horas}</p>
-                    </div>
-                  </div>
-                `;
-            });
+            }
+        }
+    });
+
         })
         .catch(error => console.error(error));
 });
