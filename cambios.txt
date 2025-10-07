@@ -1,0 +1,41 @@
+Necesito que en empleados_solic.html se realicen los siguientes cambios:
+
+Selects de Obra / Sub Obra y Sector:
+
+Deben aparecer ordenados alfabéticamente.
+
+Se debe permitir buscar por texto dentro del select.
+
+Incorporar un icono de lupa o usar una solución moderna de autocompletado/filtrado para facilitar la búsqueda.
+
+Campo motivo:
+
+En la base de datos se agregó la columna motivo (VARCHAR(255)).
+
+Este campo no es obligatorio.
+
+Si el usuario lo completa, debe ser cargado correctamente en la base de datos al enviar la solicitud.
+
+Modificaciones en server.js:
+
+Debe reflejar la lectura y almacenamiento del nuevo campo motivo.
+
+Debe ajustarse para manejar correctamente los selects actualizados con búsqueda y orden alfabético.
+
+Nueva estructura de la tabla horas:
+
+CREATE TABLE "horas" (
+  "id" SERIAL NOT NULL,
+  "fecha" DATE NULL DEFAULT NULL,
+  "personalid" INTEGER NULL DEFAULT NULL,
+  "obraid" INTEGER NULL DEFAULT NULL,
+  "subobraid" INTEGER NULL DEFAULT NULL,
+  "sectorid" INTEGER NULL DEFAULT NULL,
+  "usuario" VARCHAR(150) NULL DEFAULT NULL,
+  "fechacarga" TIMESTAMPTZ NULL DEFAULT NULL,
+  "horas" INTERVAL NULL DEFAULT NULL,
+  "estado" VARCHAR(50) NOT NULL DEFAULT 'Pendiente',
+  "aprobado_por_id" INTEGER NULL DEFAULT NULL,
+  "fecha_aprobacion" TIMESTAMP NULL DEFAULT NULL,
+  "motivo" VARCHAR(255) NULL DEFAULT NULL
+);

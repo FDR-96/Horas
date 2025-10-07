@@ -100,15 +100,25 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
     const personalId = req.session.user.id;
     try {
         const query = `
-            SELECT 
+           SELECT
                 h.estado,
-                o.obra AS nombre_obra,
+                -- Concatenamos obra y subobra si existe
+                CASE
+                    WHEN subobra.obra IS NOT NULL THEN obra.obra || ' / ' || subobra.obra
+                    ELSE obra.obra
+                END AS nombre_obra,
                 h.fechacarga,
-                h.horas as horas_solicitadas
+                h.horas AS horas_solicitadas
             FROM public.horas h
-            JOIN public.obras o ON h.obraid = o.id_sistema
+            -- Join con la obra principal
+            JOIN public.obras obra ON h.obraid = obra.id_sistema
+            -- Join opcional con la subobra (si existe)
+            LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
             WHERE h.personalid = $1
-            ORDER BY h.fechacarga DESC;
+            ORDER BY 
+               
+                h.fechacarga DESC;
+
         `;
         const result = await pool.query(query, [personalId]);
         res.json(result.rows);
@@ -133,7 +143,7 @@ app.get('/api/obras', checkAuth, async (req, res) => {
 // Get all "obras" in a hierarchical structure
 app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
     try {
-        const result = await pool.query('SELECT id_sistema, obra, parent_id FROM public.obras ORDER BY obra');
+        const result = await pool.query('SELECT id_sistema, obra, parent_id FROM public.obras ORDER BY parent_id NULLS FIRST, obra');
         const obras = result.rows;
         const hierarchy = [];
         const map = {};
@@ -205,10 +215,10 @@ app.post('/api/solicitar', checkAuth, async (req, res) => {
 
         const query = `
             INSERT INTO public.horas 
-            (fecha, personalid, obraid, subobraid, sectorid, fechacarga, horas, estado)
-            VALUES ($1, $2, $3, $4, $5, NOW(), $6, 'Pendiente')
+            (fecha, personalid, obraid, subobraid, sectorid, fechacarga, horas, estado, motivo)
+            VALUES ($1, $2, $3, $4, $5, NOW(), $6, 'Aprobado', $7)
         `;
-        await pool.query(query, [fecha, personalId, finalObraId, subObraId, sector, horas]);
+        await pool.query(query, [fecha, personalId, finalObraId, subObraId, sector, horas, razon]);
         res.status(201).json({ success: true, message: 'Solicitud enviada correctamente.' });
     } catch (error) {
         console.error('Error inserting new request:', error);
