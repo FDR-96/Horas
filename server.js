@@ -129,7 +129,7 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
                     WHEN subobra.obra IS NOT NULL THEN obra.obra || ' / ' || subobra.obra
                     ELSE obra.obra
                 END AS nombre_obra,
-                h.fechacarga,
+                h.fecha,
                 h.horas AS horas_solicitadas
             FROM public.horas h
             -- Join con la obra principal
