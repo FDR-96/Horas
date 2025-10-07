@@ -99,7 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             solicitudes.forEach(solicitud => {
     const statusInfo = getStatusInfo(solicitud.estado);
-    const fecha = new Date(solicitud.fechacarga).toLocaleDateString();
+    const fecha = new Date(solicitud.fecha).toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+
     let horas = 'N/A';
     if (solicitud.horas_solicitadas) {
         const h = solicitud.horas_solicitadas.hours || 0;
