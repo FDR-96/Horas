@@ -423,6 +423,13 @@ body.mobile-view .delete-solicitud {
 }
 
 
+img[loading="lazy"] {
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+}
+img[loading="lazy"]:not([src=""]) {
+  filter: blur(0);
+}
 
 
 
@@ -494,6 +501,32 @@ body.mobile-view .delete-solicitud {
 
 
 <script>
+    // === Lazy Load para solicitudes ===
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const lazyCard = entry.target;
+        const icon = lazyCard.querySelector('span[data-icon]');
+        if (icon) {
+          icon.textContent = icon.dataset.icon; // Carga el ícono real
+          icon.removeAttribute('data-icon');
+        }
+        obs.unobserve(lazyCard); // Ya no lo observamos
+      }
+    });
+  }, { threshold: 0.1 });
+
+  // Cada vez que agregás solicitudes dinámicas:
+  const container = document.getElementById('solicitudes_recientes');
+  const observerInit = new MutationObserver(() => {
+    document.querySelectorAll('.solicitud-card').forEach(card => observer.observe(card));
+  });
+
+  observerInit.observe(container, { childList: true });
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
      // === Detectar si es un celular ===
     const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
@@ -539,23 +572,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 container.innerHTML += `
-                  <div class="solicitud-card" data-id="${solicitud.id}">
+                <div class="solicitud-card" data-id="${solicitud.id}">
                     <div class="solicitud-icon-container ${statusInfo.bgColor}">
-                      <span class="material-symbols-outlined ${statusInfo.textColor}">${statusInfo.icon}</span>
+                    <span class="material-symbols-outlined ${statusInfo.textColor}" data-icon="${statusInfo.icon}"></span>
                     </div>
                     <div class="solicitud-info">
-                      <p class="obra-name text-fluid-base">${solicitud.nombre_obra}</p>
-                      <p class="status-text text-fluid-sm">Cargada</p>
+                    <p class="obra-name text-fluid-base">${solicitud.nombre_obra}</p>
+                    <p class="status-text text-fluid-sm">Cargada</p>
                     </div>
                     <div class="solicitud-details">
-                      <p class="date text-fluid-sm">${fecha}</p>
-                      <p class="hours text-fluid-base">${horas}</p>
+                    <p class="date text-fluid-sm">${fecha}</p>
+                    <p class="hours text-fluid-base">${horas}</p>
                     </div>
                     <button class="delete-solicitud">
-                      <span class="material-symbols-outlined">delete</span>
+                    <span class="material-symbols-outlined">delete</span>
                     </button>
-                  </div>
+                </div>
                 `;
+
             });
 
             const modal = document.getElementById('delete-modal');
