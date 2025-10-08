@@ -54,7 +54,7 @@
 </div>
  
 <div>
-<button class="flex w-full justify-center rounded-md bg-[var(--primary-color)] px-3 py-3.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[var(--primary-color-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-color)] transition duration-150 ease-in-out" type="submit">
+<button  class="flex w-full justify-center rounded-md bg-[var(--primary-color)] px-3 py-3.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[var(--primary-color-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-color)] transition duration-150 ease-in-out" type="submit">
           Iniciar Sesión
         </button>
 </div>
@@ -65,7 +65,7 @@
 <script>
     document.getElementById('login-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-
+ 
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorMessageDiv = document.getElementById('error-message');
@@ -83,7 +83,7 @@
             });
 
             const result = await response.json();
-
+ 
             if (response.ok && result.success) {
                 window.location.href = '/dashboard';
             } else {
