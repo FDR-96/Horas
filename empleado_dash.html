@@ -232,6 +232,61 @@
         .status-pendiente-bg { background-color: var(--yellow-100); }
         .status-pendiente-text { color: var(--yellow-600); }
 
+        /* ====== MODAL ====== */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--white);
+            margin: auto;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color-dark);
+        }
+        .modal-text {
+            margin: 1rem 0;
+            color: var(--text-color-light);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        .modal-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        .modal-button.confirm {
+            background-color: var(--red-600);
+            color: var(--white);
+        }
+        .modal-button.cancel {
+            background-color: #e5e7eb; /* gray-200 */
+            color: var(--text-color-dark);
+        }
+
+
         /* ====== MEDIA QUERIES PARA RESPONSIVE ====== */
         @media (min-width: 640px) {
             .text-fluid-2xl { font-size: 1.75rem; }
@@ -283,20 +338,20 @@
                     <div class="user-avatar" style='background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8t_9-O-1-cr_Uo_K-mCl-a-H-do-e-a-E-A&s");'></div>
                     <div class="user-details">
                         <p id="usuario" class="name text-fluid-xl">Cargando...</p>
-                        <p id="id_usuario" class="id text-fluid-lg">ID Empleado: ...</p>
+                       <!--- <p id="id_usuario" class="id text-fluid-lg">ID Empleado: ...</p>-->
                     </div>
                 </div>
                 <div class="request-button-container">
                     <button id="solicitar" class="request-button">
                         <span class="material-symbols-outlined">add</span>
-                        <span class="text-fluid-xl">Solicitar horas</span>
+                        <span class="text-fluid-xl">Cargar horas</span>
                     </button>
                 </div>
             </div>
          
             <!-- SOLICITUDES -->
             <div class="requests-section-header">
-                <h2 class="title text-fluid-xl">Obras cargadas</h2>
+                <h2 class="title text-fluid-xl">Horas cargadas</h2>
                 <a class="see-all text-fluid-lg" href="#">Ver todo</a>
             </div>
 
@@ -307,21 +362,34 @@
     </div>
 </div>
 
+<!-- MODAL DE CONFIRMACIÓN -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">Atención</h2>
+        <p class="modal-text">Estás por eliminar una carga de Horas. ¿Deseas continuar?</p>
+        <div class="modal-buttons">
+            <button id="cancel-delete" class="modal-button cancel">Cancelar</button>
+            <button id="confirm-delete" class="modal-button confirm">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    /*
+    
     fetch('/api/user')
         .then(response => response.json())
         .then(data => {
             if(data.nombre && data.id_usuario) {
                 document.getElementById('usuario').textContent = data.nombre;
-                document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
+               // document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
             } else {
                  window.location.href = '/login.html';
             }
         })
         .catch(() => window.location.href = '/login.html');
-*/
+
     fetch('/api/solicitudes')
         .then(response => response.json())
         .then(solicitudes => {
@@ -353,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="solicitud-info">
                       <p class="obra-name text-fluid-base">${solicitud.nombre_obra}</p>
-                      <p class="status-text text-fluid-sm">${statusInfo.text}</p>
+                      <p class="status-text text-fluid-sm">Cargada</p>
                     </div>
                     <div class="solicitud-details">
                       <p class="date text-fluid-sm">${fecha}</p>
@@ -366,25 +434,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
 
-            container.addEventListener('click', async (e) => {
-                if(e.target.closest('.delete-solicitud')) {
-                    const card = e.target.closest('[data-id]');
-                    const id = card.dataset.id;
-                    if(confirm('¿Desea eliminar esta solicitud?')) {
-                        try {
-                            const res = await fetch(`/api/solicitudes/${id}`, { method: 'DELETE' });
-                            const result = await res.json();
-                            if(res.ok && result.success) {
-                                card.remove();
-                                alert('Solicitud eliminada correctamente.');
-                            } else {
-                                alert(result.message || 'Error eliminando la solicitud.');
-                            }
-                        } catch (err) {
-                            console.error(err);
-                            alert('No se pudo conectar con el servidor.');
-                        }
+            const modal = document.getElementById('delete-modal');
+            const confirmDeleteBtn = document.getElementById('confirm-delete');
+            const cancelDeleteBtn = document.getElementById('cancel-delete');
+            let solicitudIdToDelete = null;
+
+            container.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-solicitud');
+                if (deleteButton) {
+                    const card = deleteButton.closest('[data-id]');
+                    solicitudIdToDelete = card.dataset.id;
+                    modal.style.display = 'flex';
+                }
+            });
+
+            cancelDeleteBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                solicitudIdToDelete = null;
+            });
+
+            confirmDeleteBtn.addEventListener('click', async () => {
+                if (!solicitudIdToDelete) return;
+
+                try {
+                    const res = await fetch(`/api/solicitudes/${solicitudIdToDelete}`, { method: 'DELETE' });
+                    const result = await res.json();
+                    
+                    if (res.ok && result.success) {
+                        document.querySelector(`.solicitud-card[data-id='${solicitudIdToDelete}']`).remove();
+                        alert('Solicitud eliminada correctamente.');
+                    } else {
+                        alert(result.message || 'Error eliminando la solicitud.');
                     }
+                } catch (err) {
+                    console.error(err);
+                    alert('No se pudo conectar con el servidor.');
+                } finally {
+                    modal.style.display = 'none';
+                    solicitudIdToDelete = null;
+                }
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target == modal) {
+                    modal.style.display = 'none';
+                    solicitudIdToDelete = null;
                 }
             });
         })

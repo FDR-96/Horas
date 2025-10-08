@@ -50,15 +50,6 @@ select#sector {
     font-size: 1.1rem;
   }
 
-  /* --- jstree custom --- */
-  #obra-tree-container {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
-  .jstree-default .jstree-anchor {
-    padding: 4px 6px;
-  }
-
   /* Responsive form container */
   main {
     max-width: 600px;
@@ -74,6 +65,23 @@ select#sector {
   /* flatpickr font-size */
   .flatpickr-input {
     font-size: 1rem !important;
+  }
+
+  /* --- jstree custom --- */
+  .jstree-container-ul .jstree-node {
+    margin-bottom: 2px;
+  }
+  .jstree-container-ul .jstree-node:nth-child(even) > .jstree-anchor {
+    background-color: #f3f4f6; /* gray-100 */
+  }
+  .jstree-default .jstree-anchor:hover {
+    background-color: #e5e7eb; /* gray-200 */
+  }
+  .jstree-default .jstree-clicked {
+    background-color: #dbeafe !important; /* blue-200 */
+  }
+  .jstree-default .jstree-search {
+    font-weight: bold;
   }
 
   @media (max-width: 640px) {
@@ -102,21 +110,23 @@ select#sector {
       <button id="back-button" class="text-gray-700">
         <span class="material-symbols-outlined text-3xl">arrow_back_ios_new</span>
       </button>
-      <h1 class="font-bold text-gray-900 flex-1 text-center pr-8">Solicitud de Horas</h1>
+      <h1 class="font-bold text-gray-900 flex-1 text-center pr-8">Carga de horas</h1>
     </header>
 
     <main class="flex-1 px-4 py-8 w-full">
-      <form id="solicitud-form" class="space-y-6">
+      <form id="solicitud-form" class="space-y-6" novalidate>
         <div id="status-message" class="hidden text-center p-3 rounded-md text-base"></div>
 
         <!-- Obra/Subobra -->
         <div>
-          <label for="obra" class="block font-medium text-gray-700 mb-2">Obra / Sub Obra *</label>
-          <div class="relative w-full">
+          <label for="obra-dropdown" class="block font-medium text-gray-700 mb-2">Obra / Sub Obra *</label>
+          <div class="relative flex items-center w-full">
             <input type="text" id="obra-dropdown" placeholder="Seleccionar obra/subobra..." readonly
                    class="form-input w-full rounded-lg border-gray-300 py-3 pl-3 pr-10 text-gray-900 cursor-pointer focus:border-red-500 focus:ring-red-500"/>
-            <div id="obra-tree-container" class="absolute z-50 w-full mt-1 max-h-72 overflow-auto rounded-lg border bg-white hidden shadow-lg"></div>
-            <input type="hidden" id="obra" name="obra">
+            <button type="button" id="open-obra-modal-btn" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <span class="material-symbols-outlined">search</span>
+            </button>
+            <input type="hidden" id="obra" name="obra" required>
           </div>
         </div>
 
@@ -151,18 +161,33 @@ select#sector {
     </main>
   </div>
 
-
- 
-
   <footer class="sticky bottom-0 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
-  <div class="flex justify-center p-4">
-    <button type="submit" form="solicitud-form"
-            class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-base font-bold leading-normal tracking-[0.015em] gap-2"class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-base font-bold leading-normal tracking-[0.015em] gap-2">
-      Enviar Solicitud
-    </button>
+    <div class="flex justify-center p-4">
+      <button type="submit" form="solicitud-form"
+              class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-base font-bold leading-normal tracking-[0.015em] gap-2">
+        Cargar
+      </button>
     </div>
   </footer>
 </div>
+
+<!-- Modal de Búsqueda de Obra -->
+<div id="obra-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+    <div id="obra-modal-content" class="w-full max-w-md rounded-lg bg-white p-4 shadow-lg mx-4 flex flex-col" style="height: 80vh;">
+        <div class="flex-shrink-0">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Buscar Obra / Subobra</h2>
+            <input type="text" id="obra-search-input" placeholder="Escribe para filtrar..."
+                   class="form-input w-full rounded-md border-gray-300 py-2 px-3 text-base focus:ring-red-500 focus:border-red-500 mb-4">
+        </div>
+        <div id="obra-tree-container" class="flex-grow overflow-auto border rounded-md">
+            <!-- jstree se renderizará aquí -->
+        </div>
+        <div class="mt-4 flex-shrink-0">
+            <button id="close-obra-modal" class="w-full rounded-lg bg-gray-200 px-4 py-2.5 text-base font-semibold text-gray-800 hover:bg-gray-300">Cerrar</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -179,19 +204,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   const obraDropdown = document.getElementById('obra-dropdown');
   const treeContainer = document.getElementById('obra-tree-container');
 
+  // --- Modal de Obra ---
+  const obraModal = document.getElementById('obra-modal');
+  const obraModalContent = document.getElementById('obra-modal-content');
+  const openObraModalBtn = document.getElementById('open-obra-modal-btn');
+  const closeObraModalBtn = document.getElementById('close-obra-modal');
+  const obraSearchInput = document.getElementById('obra-search-input');
+
   // --- Flatpickr ---
   flatpickr("#fecha", {
     dateFormat: "Y-m-d",
+    defaultDate: new Date(),
     altInput: true,
     altFormat: "d/m/Y",
     allowInput: true,
-    onChange: (selectedDates) => {
-      const today = new Date(); today.setHours(0,0,0,0);
-      if (selectedDates[0] > today) {
-        alert("La fecha debe ser igual o menor a la fecha actual.");
-        document.getElementById('fecha').value = '';
-      }
-    }
+    maxDate: new Date(),
   });
   flatpickr("#horas", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
 
@@ -202,109 +229,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataObras = await res.json();
   } catch (err) { console.error('Error cargando obras', err); }
 
-  // --- Datos jsTree ---
-// --- Preparar datos para jsTree ---
-const treeData = dataObras
-  .filter(obra => obra.obra && obra.obra.trim() !== "")
-  .sort((a, b) => a.obra.localeCompare(b.obra))
-  .map(obra => {
-    const validSubobras = (obra.subobras || [])
-      .filter(sub => sub.obra && sub.obra.trim() !== "")
-      .sort((a, b) => a.obra.localeCompare(b.obra));
+  // --- Preparar datos para jsTree ---
+  const treeData = dataObras
+    .filter(obra => obra.obra && obra.obra.trim() !== "")
+    .sort((a, b) => a.obra.localeCompare(b.obra))
+    .map(obra => {
+      const validSubobras = (obra.subobras || [])
+        .filter(sub => sub.obra && sub.obra.trim() !== "")
+        .sort((a, b) => a.obra.localeCompare(b.obra));
 
-    if (validSubobras.length > 0) {
       return {
         id: `obra-${obra.id_sistema}`,
         text: obra.obra,
-        icon: "material-symbols-outlined text-amber-500", // carpeta
         state: { opened: false },
         children: validSubobras.map(sub => ({
           id: `subobra-${sub.id_sistema}`,
           text: sub.obra,
-          icon: "material-symbols-outlined text-gray-500" // subobra (documento)
         }))
       };
-    } else {
-      return {
-        id: `obra-${obra.id_sistema}`,
-        text: obra.obra,
-        icon: "material-symbols-outlined text-gray-500" // obra sin subobras
-      };
-    }
-  });
-
-
-  // --- Buscador superior ---
-  const searchContainer = document.createElement('div');
-  searchContainer.className = 'sticky top-0 bg-white border-b p-2 z-10';
-  const searchInput = document.createElement('input');
-  searchInput.type = 'text';
-  searchInput.placeholder = 'Buscar obra/subobra...';
-  searchInput.className = 'form-input w-full rounded-md border-gray-300 py-2 px-3 text-base focus:ring-red-500 focus:border-red-500';
-  searchContainer.appendChild(searchInput);
-
-  const noResultsMsg = document.createElement('div');
-  noResultsMsg.textContent = 'No se encontraron coincidencias';
-  noResultsMsg.className = 'hidden text-gray-500 text-base text-center p-2';
-  treeContainer.appendChild(noResultsMsg);
-  treeContainer.prepend(searchContainer);
+    });
 
   // --- Inicializar jsTree ---
   $(treeContainer).jstree({
-    core: { data: treeData, multiple: false },
+    core: {
+        data: treeData,
+        multiple: false,
+        themes: {
+            icons: false // Desactivar íconos
+        }
+    },
     plugins: ["search", "wholerow"],
-    search: { show_only_matches: true, show_only_matches_children: true, case_insensitive: true }
+    search: {
+        show_only_matches: true,
+        show_only_matches_children: true,
+        case_insensitive: true
+    }
+  }).on('ready.jstree', function (e, data) {
+      data.instance.open_all();
+  });
+
+  // --- Lógica del Modal de Obra ---
+  const openModal = () => {
+      const inputRect = obraDropdown.getBoundingClientRect();
+      obraModalContent.style.width = `${inputRect.width}px`;
+      obraModal.classList.remove('hidden');
+      obraSearchInput.focus();
+  };
+  openObraModalBtn.addEventListener('click', openModal);
+  obraDropdown.addEventListener('click', openModal);
+
+  closeObraModalBtn.addEventListener('click', () => obraModal.classList.add('hidden'));
+  window.addEventListener('click', (e) => {
+      if (e.target == obraModal) obraModal.classList.add('hidden');
   });
 
   let searchTimeout;
-  searchInput.addEventListener('input', () => {
+  obraSearchInput.addEventListener('keyup', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      const val = searchInput.value.trim();
-      const tree = $(treeContainer).jstree(true);
-      tree.search(val);
-      const visible = tree.get_container_ul().find('li.jstree-node:visible').length;
-      noResultsMsg.classList.toggle('hidden', !(val && visible === 0));
-    }, 200);
+        $(treeContainer).jstree(true).search(obraSearchInput.value);
+    }, 250);
   });
 
-  obraDropdown.addEventListener('click', () => {
-    const isHidden = treeContainer.classList.contains('hidden');
-    treeContainer.classList.toggle('hidden', !isHidden);
-    if (isHidden) {
-      searchInput.value = '';
-      $(treeContainer).jstree(true).clear_search();
-      setTimeout(() => searchInput.focus(), 100);
+  $(treeContainer).on("select_node.jstree", (e, data) => {
+    const node = data.node;
+    const tree = $(treeContainer).jstree(true);
+    if (node.children.length === 0) {
+      let displayText = node.text;
+      const parent = tree.get_parent(node);
+      if (parent && parent !== "#") {
+        displayText = tree.get_node(parent).text + " / " + node.text;
+      }
+      obraDropdown.value = displayText;
+      obraInput.value = node.id.split('-')[1];
+      obraModal.classList.add('hidden');
+    } else {
+      tree.toggle_node(node);
     }
   });
-
-  document.addEventListener('click', e => {
-    if (!treeContainer.contains(e.target) && e.target !== obraDropdown) {
-      treeContainer.classList.add('hidden');
-    }
-  });
-
-$(treeContainer).on("select_node.jstree", (e, data) => {
-  const node = data.node;
-  const tree = $(treeContainer).jstree(true);
-
-  if (node.children.length === 0) { // es una hoja (subobra o obra sin hijos)
-    let displayText = node.text;
-
-    const parent = tree.get_parent(node); // id del padre
-    if (parent && parent !== "#") {
-      const parentNode = tree.get_node(parent);
-      displayText = parentNode.text + " / " + node.text; // obra/subobra
-    }
-
-    obraDropdown.value = displayText;
-    obraInput.value = node.id.split('-')[1]; // id para envío
-    treeContainer.classList.add('hidden');
-  } else {
-    tree.toggle_node(node); // abrir/cerrar obra
-  }
-});
-
 
   // --- TomSelect ---
   const sectorSelect = new TomSelect("#sector", {
@@ -320,30 +322,39 @@ $(treeContainer).on("select_node.jstree", (e, data) => {
   // --- Envío ---
   form.addEventListener('submit', async e => {
     e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    if (!obraInput.value) {
+      alert("Debe seleccionar una obra o subobra.");
+      return;
+    }
+
     const data = Object.fromEntries(new FormData(form).entries());
-    if (!obraInput.value) return alert("Debe seleccionar una obra o subobra.");
     data.obraid = parseInt(obraInput.value);
     data.subobraid = null;
 
     try {
       const r = await fetch('/api/solicitar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
       const result = await r.json();
-      statusMessage.classList.remove('hidden');
+      statusMessage.className = 'text-center p-3 rounded-md text-base'; // Reset classes
       if (r.ok && result.success) {
         statusMessage.textContent = 'Solicitud enviada con éxito. Redirigiendo...';
         statusMessage.classList.add('bg-green-100','text-green-700');
-        setTimeout(()=>window.location.href='/dashboard',2000);
+        setTimeout(()=>window.location.href='/empleado_dash.html', 2000);
       } else {
         statusMessage.textContent = result.message || 'Error al enviar la solicitud.';
         statusMessage.classList.add('bg-red-100','text-red-700');
       }
-    } catch {
+    } catch(err) {
+      console.error(err);
       statusMessage.textContent = 'No se pudo conectar con el servidor.';
       statusMessage.classList.add('bg-red-100','text-red-700');
     }
   });
 
-  document.getElementById('back-button').addEventListener('click', () => window.location.href = '/dashboard');
+  document.getElementById('back-button').addEventListener('click', () => window.location.href = '/empleado_dash.html');
 });
 </script>
 </body>
