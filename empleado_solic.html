@@ -220,7 +220,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     allowInput: true,
     maxDate: new Date(),
   });
-  flatpickr("#horas", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+ flatpickr("#horas", {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: "H:i",
+  time_24hr: true,
+  minuteIncrement: 5,        // pasos de 5 min (ajustable)
+  defaultHour: 8,            // hora inicial sugerida
+  disableMobile: true        // 🔥 fuerza Flatpickr incluso en móviles
+});
 
   // --- Cargar obras/subobras ---
   let dataObras = [];
