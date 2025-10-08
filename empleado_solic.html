@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         $(treeContainer).jstree(true).search(obraSearchInput.value);
-    }, 250);
+    }, 600);
   });
 
   $(treeContainer).on("select_node.jstree", (e, data) => {
@@ -348,9 +348,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const result = await r.json();
       statusMessage.className = 'text-center p-3 rounded-md text-base'; // Reset classes
       if (r.ok && result.success) {
-        statusMessage.textContent = 'Solicitud enviada con éxito. Redirigiendo...';
+        statusMessage.textContent = 'Solicitud cargada con éxito. Redirigiendo...';
         statusMessage.classList.add('bg-green-100','text-green-700');
-        setTimeout(()=>window.location.href='/empleado_dash.html', 2000);
+        setTimeout(()=>window.location.href='/empleado_dash.html', 1000);
       } else {
         statusMessage.textContent = result.message || 'Error al enviar la solicitud.';
         statusMessage.classList.add('bg-red-100','text-red-700');
