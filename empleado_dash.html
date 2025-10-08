@@ -316,6 +316,113 @@
                 padding: 0; /* Quitar padding vertical en pantallas grandes */
             }
         }
+        /* ====== VISTA MÓVIL PERSONALIZADA ====== */
+body.mobile-view .solicitud-card {
+    flex-direction: column; /* apila contenido */
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+body.mobile-view .solicitud-icon-container {
+    align-self: flex-start;
+}
+
+body.mobile-view .solicitud-info {
+    width: 100%;
+}
+
+body.mobile-view .solicitud-details {
+    width: 100%;
+    text-align: left; /* detalles debajo */
+    margin-top: 0.25rem;
+}
+
+body.mobile-view .delete-solicitud {
+    align-self: flex-end; /* botón a la derecha */
+}
+
+
+
+
+/* ====== HEADER GENERAL ====== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+
+/* ====== BLOQUE IZQUIERDO: LOGO + TITULO ====== */
+.header-title.brand {
+  display: flex;
+  flex-direction: column; /* logo arriba, texto abajo */
+  align-items: flex-start; /* SIEMPRE alineado a la izquierda */
+  justify-content: center;
+}
+
+/* Logo un poco más grande */
+.header-title.brand img {
+  height: 50px;
+  width: auto;
+}
+
+/* Texto en gris oscuro */
+.header-title.brand h1 {
+  margin-top: 0.35rem;
+  margin-left: 3rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #555555; /* gris oscuro */
+  text-align: left;
+  letter-spacing: -0.3px;
+}
+
+/* ====== BOTÓN DE LOGOUT ====== */
+.header-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-button .material-symbols-outlined {
+  font-size: 28px;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.header-button:hover .material-symbols-outlined {
+  color: var(--accent-color, #0077ff);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+  .header {
+    padding: 0.4rem 0.8rem;
+  }
+
+  .header-title.brand img {
+    height: 42px;
+  }
+
+  .header-title.brand h1 {
+    font-size: 1.0rem;
+      margin-left: 1.5rem;
+  }
+
+  .header-button .material-symbols-outlined {
+    font-size: 24px;
+  }
+}
+
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -324,18 +431,25 @@
     <div>
         <!-- HEADER -->
         <header class="header">
+            <div class="header-title brand">
+                <img 
+                src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp" 
+                alt="Logo Albace" 
+                />
+                <h1>TimeTrack</h1>
+            </div>
             <button id="logout-button" class="header-button">
                 <span class="material-symbols-outlined">logout</span>
             </button>
-            <h1 class="header-title text-fluid-2xl">Dashboard</h1>
-            <div class="header-placeholder"></div>
-        </header>
+            </header>
+
+
 
         <main class="main-content">
             <!-- PERFIL USUARIO -->
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-avatar" style='background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8t_9-O-1-cr_Uo_K-mCl-a-H-do-e-a-E-A&s");'></div>
+                    <div  class="name text-fluid-xl"><p>Usuario:</p></div>
                     <div class="user-details">
                         <p id="usuario" class="name text-fluid-xl">Cargando...</p>
                        <!--- <p id="id_usuario" class="id text-fluid-lg">ID Empleado: ...</p>-->
@@ -377,7 +491,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    
+     // === Detectar si es un celular ===
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
+                     || window.innerWidth < 640;
+
+    if (isMobile) {
+        document.body.classList.add('mobile-view');
+    }
     fetch('/api/user')
         .then(response => response.json())
         .then(data => {
