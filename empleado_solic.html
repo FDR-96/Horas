@@ -172,21 +172,39 @@ select#sector {
 </div>
 
 <!-- Modal de Búsqueda de Obra -->
+<!-- Modal de Búsqueda de Obra -->
 <div id="obra-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
-    <div id="obra-modal-content" class="w-full max-w-md rounded-lg bg-white p-4 shadow-lg mx-4 flex flex-col" style="height: 80vh;">
-        <div class="flex-shrink-0">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Buscar Obra / Subobra</h2>
-            <input type="text" id="obra-search-input" placeholder="Escribe para filtrar..."
-                   class="form-input w-full rounded-md border-gray-300 py-2 px-3 text-base focus:ring-red-500 focus:border-red-500 mb-4">
-        </div>
-        <div id="obra-tree-container" class="flex-grow overflow-auto border rounded-md">
-            <!-- jstree se renderizará aquí -->
-        </div>
-        <div class="mt-4 flex-shrink-0">
-            <button id="close-obra-modal" class="w-full rounded-lg bg-gray-200 px-4 py-2.5 text-base font-semibold text-gray-800 hover:bg-gray-300">Cerrar</button>
-        </div>
+  <div id="obra-modal-content" class="w-full max-w-md rounded-lg bg-white p-4 shadow-lg mx-4 flex flex-col" style="height: 80vh;">
+    <div class="flex-shrink-0">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Buscar Obra / Subobra</h2>
+
+      <!-- 🔍 Campo + botón de búsqueda -->
+      <div class="flex gap-2 mb-4">
+        <input
+          type="text"
+          id="obra-search-input"
+          placeholder="Escribe para filtrar..."
+          class="form-input flex-grow rounded-md border-gray-300 py-2 px-3 text-base focus:ring-red-500 focus:border-red-500"
+        >
+        <button
+          id="obra-search-btn"
+          class="bg-[#F26722] text-white px-4 py-2 rounded-md hover:bg-[#e25e1f] transition font-semibold"
+        >
+          Buscar
+        </button>
+      </div>
     </div>
+
+    <div id="obra-tree-container" class="flex-grow overflow-auto border rounded-md"></div>
+
+    <div class="mt-4 flex-shrink-0">
+      <button id="close-obra-modal" class="w-full rounded-lg bg-gray-200 px-4 py-2.5 text-base font-semibold text-gray-800 hover:bg-gray-300">
+        Cerrar
+      </button>
+    </div>
+  </div>
 </div>
+
 
 
 <!-- Scripts -->
@@ -291,13 +309,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.target == obraModal) obraModal.classList.add('hidden');
   });
 
-  let searchTimeout;
-  obraSearchInput.addEventListener('keyup', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        $(treeContainer).jstree(true).search(obraSearchInput.value);
-    }, 600);
+  // --- Nueva búsqueda optimizada ---
+  const obraSearchBtn = document.getElementById('obra-search-btn');
+  let lastSearch = "";
+
+  const ejecutarBusqueda = () => {
+    const term = obraSearchInput.value.trim();
+    if (term === lastSearch) return; // evita búsquedas repetidas
+    lastSearch = term;
+
+    const tree = $(treeContainer).jstree(true);
+    tree.clear_search();
+    if (term.length === 0) return;
+
+    // 🔍 Ejecuta la búsqueda rápida
+    tree.search(term);
+
+    // Abre nodos relevantes (mejor experiencia)
+    setTimeout(() => {
+      tree.get_container().find(".jstree-search").each(function() {
+        const nodeId = $(this).closest("li").attr("id");
+        tree.open_node(nodeId);
+      });
+    }, 100);
+  };
+
+  obraSearchBtn.addEventListener('click', ejecutarBusqueda);
+  obraSearchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      ejecutarBusqueda();
+    }
   });
+
 
   $(treeContainer).on("select_node.jstree", (e, data) => {
     const node = data.node;
