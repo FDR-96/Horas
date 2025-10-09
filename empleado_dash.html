@@ -430,8 +430,44 @@ img[loading="lazy"] {
 img[loading="lazy"]:not([src=""]) {
   filter: blur(0);
 }
+ 
+.footer {
+    height: 2vh;
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.05);
+  padding: 3rem 0;
+}
 
+.footer-logos {
+  margin-top: -2vh;
+  display: flex;
+  justify-content: center;    /* centra horizontalmente */
+  align-items: center;        /* centra verticalmente */
+  gap: 4rem;                  /* espacio entre logos */
+}
 
+.footer-logos img {
+  max-height: 5vh;           /* 10% del alto visible de la pantalla */
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.footer-logos img:hover {
+  transform: scale(1.05);     /* efecto sutil al pasar el mouse */
+}
+
+@media (max-width: 600px) {
+  .footer-logos {
+    gap: 1rem;
+  }
+  .footer-logos img {
+    max-height: 5vh;
+  }
+}
 
 
     </style>
@@ -440,14 +476,14 @@ img[loading="lazy"]:not([src=""]) {
 
 <div class="main-container">
     <div>
-        <!-- HEADER -->
+        <!--src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp" HEADER -->
         <header class="header">
             <div class="header-title brand">
                 <img 
-                src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp" 
-                alt="Logo Albace" 
+                 src="assets/tracktime.webp" 
+                 alt="Logo Albace" 
                 />
-                <h1>TimeTrack</h1>
+                <!--<h1>TimeTrack</h1>-->
             </div>
             <button id="logout-button" class="header-button">
                 <span class="material-symbols-outlined">logout</span>
@@ -498,8 +534,20 @@ img[loading="lazy"]:not([src=""]) {
         </div>
     </div>
 </div>
+  <footer class="footer">
+  <div class="footer-logos">
+    <img 
+      src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp"
+      alt="Logo Albace" 
+    />
+    <img 
+      src="assets/AxuraLogo.png" 
+      alt="Logo Axura" 
+    />
+  </div>
+</footer>
 
-
+ 
 <script>
     // === Lazy Load para solicitudes ===
 document.addEventListener('DOMContentLoaded', () => {
