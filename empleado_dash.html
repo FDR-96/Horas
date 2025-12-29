@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>Dashboard del Empleado</title>
+    <style>
+        :root {
+            --primary-color: #F26722;
+            --text-color-dark: #1f2937;
+            --text-color-light: #6b7280;
+            --background-color: #f9fafb;
+            --white: #ffffff;
+            --red-100: #fee2e2;
+            --red-600: #dc2626;
+            --emerald-100: #d1fae5;
+            --emerald-600: #059669;
+            --yellow-100: #fef3c7;
+            --yellow-600: #d97706;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* ====== RESET BÁSICO ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100dvh;
+            font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            font-size: 16px;
+            /* Base font size */
+        }
+
+        button,
+        a {
+            cursor: pointer;
+            border: none;
+            background: none;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ====== TIPOGRAFÍA FLUIDA ====== */
+        .text-fluid-2xl {
+            font-size: clamp(1.6rem, 5vw, 2rem);
+        }
+
+        .text-fluid-xl {
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+        }
+
+        .text-fluid-lg {
+            font-size: clamp(1.1rem, 3.5vw, 1.25rem);
+        }
+
+        .text-fluid-base {
+            font-size: clamp(1rem, 3vw, 1.1rem);
+        }
+
+        .text-fluid-sm {
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        /* ====== CONTENEDOR PRINCIPAL ====== */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 900px;
+            /* Ancho máximo para PC */
+            margin: 0 auto;
+            /* Centrado en PC */
+            padding: 0 1rem;
+            /* Padding a los costados en PC */
+        }
+
+        /* ====== HEADER ====== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            background-color: rgba(249, 250, 251, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text-color-dark);
+        }
+
+        .header-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-color-dark);
+        }
+
+        .header-placeholder {
+            width: 40px;
+            height: 40px;
+        }
+
+        /* ====== MAIN CONTENT ====== */
+        .main-content {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        /* ====== PERFIL DE USUARIO ====== */
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+
+        .user-details .name {
+            font-weight: 700;
+            color: var(--text-color-dark);
+        }
+
+        .user-details .id {
+            color: var(--text-color-light);
+        }
+
+        /* ====== BOTÓN DE SOLICITUD ====== */
+        .request-button-container {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .request-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 480px;
+            height: 48px;
+            padding: 0 1.25rem;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.015em;
+            gap: 0.5rem;
+        }
+
+        /* ====== SECCIÓN DE SOLICITUDES ====== */
+        .requests-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 0 0.75rem 0;
+        }
+
+        .requests-section-header .title {
+            font-weight: 700;
+            color: var(--text-color-dark);
+        }
+
+        .requests-section-header .see-all {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* ====== TARJETA DE SOLICITUD ====== */
+        .solicitud-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--white);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .solicitud-icon-container {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .solicitud-info {
+            flex: 1;
+        }
+
+        .solicitud-info .obra-name {
+            font-weight: 500;
+            color: var(--text-color-dark);
+        }
+
+        .solicitud-info .status-text {
+            color: var(--text-color-light);
+        }
+
+        .solicitud-details {
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .solicitud-details .date {
+            color: var(--text-color-light);
+        }
+
+        .solicitud-details .hours {
+            font-weight: 500;
+            color: var(--text-color-dark);
+        }
+
+        .delete-solicitud {
+            color: var(--red-600);
+            margin-left: 0.5rem;
+        }
+
+        .delete-solicitud:hover {
+            opacity: 0.8;
+        }
+
+        /* ====== ESTADOS DE SOLICITUD ====== */
+        .status-aprobado-bg {
+            background-color: var(--emerald-100);
+        }
+
+        .status-aprobado-text {
+            color: var(--emerald-600);
+        }
+
+        .status-rechazado-bg {
+            background-color: var(--red-100);
+        }
+
+        .status-rechazado-text {
+            color: var(--red-600);
+        }
+
+        .status-pendiente-bg {
+            background-color: var(--yellow-100);
+        }
+
+        .status-pendiente-text {
+            color: var(--yellow-600);
+        }
+
+        /* ====== MODAL ====== */
+        .modal {
+            display: none;
+            /* Oculto por defecto */
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: auto;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color-dark);
+        }
+
+        .modal-text {
+            margin: 1rem 0;
+            color: var(--text-color-light);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .modal-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .modal-button.confirm {
+            background-color: var(--red-600);
+            color: var(--white);
+        }
+
+        .modal-button.cancel {
+            background-color: #e5e7eb;
+            /* gray-200 */
+            color: var(--text-color-dark);
+        }
+
+
+        /* ====== MEDIA QUERIES PARA RESPONSIVE ====== */
+        @media (min-width: 640px) {
+            .text-fluid-2xl {
+                font-size: 1.75rem;
+            }
+
+            .text-fluid-xl {
+                font-size: 1.25rem;
+            }
+
+            .text-fluid-lg {
+                font-size: 1.1rem;
+            }
+
+            .text-fluid-base {
+                font-size: 1rem;
+            }
+
+            .text-fluid-sm {
+                font-size: 0.9rem;
+            }
+
+            .header {
+                justify-content: flex-start;
+                gap: 1rem;
+            }
+
+            .header-title {
+                text-align: left;
+                flex: none;
+            }
+
+            .header-placeholder {
+                display: none;
+            }
+
+            .user-profile {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .request-button-container {
+                padding: 0;
+                /* Quitar padding vertical en pantallas grandes */
+            }
+        }
+
+        /* ====== VISTA MÓVIL PERSONALIZADA ====== */
+        body.mobile-view .solicitud-card {
+            flex-direction: column;
+            /* apila contenido */
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        body.mobile-view .solicitud-icon-container {
+            align-self: flex-start;
+        }
+
+        body.mobile-view .solicitud-info {
+            width: 80%;
+            margin-left: 3.5rem;
+            margin-top: -3rem;
+        }
+
+        body.mobile-view .solicitud-details {
+            width: 100%;
+            text-align: left;
+            /* detalles debajo */
+            margin-top: 0.25rem;
+        }
+
+        body.mobile-view .delete-solicitud {
+            align-self: flex-end;
+            /* botón a la derecha */
+            margin-top: -2rem;
+        }
+
+
+
+
+        /* ====== HEADER GENERAL ====== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+        }
+
+        /* ====== BLOQUE IZQUIERDO: LOGO + TITULO ====== */
+        .header-title.brand {
+            display: flex;
+            flex-direction: column;
+            /* logo arriba, texto abajo */
+            align-items: flex-start;
+            /* SIEMPRE alineado a la izquierda */
+            justify-content: center;
+        }
+
+        /* Logo un poco más grande */
+        .header-title.brand img {
+            height: 50px;
+            width: auto;
+        }
+
+        /* Texto en gris oscuro */
+        .header-title.brand h1 {
+            margin-top: 0.35rem;
+            margin-left: 3rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #555555;
+            /* gris oscuro */
+            text-align: left;
+            letter-spacing: -0.3px;
+        }
+
+        /* ====== BOTÓN DE LOGOUT ====== */
+        .header-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-button .material-symbols-outlined {
+            font-size: 28px;
+            color: var(--text-primary);
+            transition: color 0.2s ease;
+        }
+
+        .header-button:hover .material-symbols-outlined {
+            color: var(--accent-color, #0077ff);
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 600px) {
+            .header {
+                padding: 0.4rem 0.8rem;
+            }
+
+            .header-title.brand img {
+                height: 42px;
+            }
+
+            .header-title.brand h1 {
+                font-size: 1.0rem;
+                margin-left: 1.5rem;
+            }
+
+            .header-button .material-symbols-outlined {
+                font-size: 24px;
+            }
+        }
+
+
+        img[loading="lazy"] {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+        }
+
+        img[loading="lazy"]:not([src=""]) {
+            filter: blur(0);
+        }
+
+        .footer {
+            height: 2vh;
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+            padding: 3rem 0;
+        }
+
+        .footer-logos {
+            margin-top: -2vh;
+            display: flex;
+            justify-content: center;
+            /* centra horizontalmente */
+            align-items: center;
+            /* centra verticalmente */
+            gap: 4rem;
+            /* espacio entre logos */
+        }
+
+        .footer-logos img {
+            max-height: 5vh;
+            /* 10% del alto visible de la pantalla */
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+
+        .footer-logos img:hover {
+            transform: scale(1.05);
+            /* efecto sutil al pasar el mouse */
+        }
+
+        @media (max-width: 600px) {
+            .footer-logos {
+                gap: 1rem;
+            }
+
+            .footer-logos img {
+                max-height: 5vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div>
+            <!--src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp" HEADER -->
+            <header class="header">
+                <div class="header-title brand">
+                    <img src="assets/tracktime.webp" alt="Logo Albace" />
+                    <!--<h1>TimeTrack</h1>-->
+                </div>
+                <button id="logout-button" class="header-button">
+                    <span class="material-symbols-outlined">logout</span>
+                </button>
+            </header>
+
+
+
+            <main class="main-content">
+                <!-- PERFIL USUARIO -->
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="name text-fluid-xl">
+                            <p>Usuario:</p>
+                        </div>
+                        <div class="user-details">
+                            <p id="usuario" class="name text-fluid-xl">Cargando...</p>
+
+                            <!--- <p id="id_usuario" class="id text-fluid-lg">ID Empleado: ...</p>-->
+                        </div>
+                        <div class="name text-fluid-xl">
+                            <p>Horas pedidas hoy:</p>
+                        </div>
+                        <div class="user-details">
+                            <p id="horas_hoy" class="id text-fluid-lg">0h 0m</p>
+                        </div>
+                    </div>
+                    <div class="request-button-container">
+                        <button id="solicitar" class="request-button">
+                            <span class="material-symbols-outlined">add</span>
+                            <span class="text-fluid-xl">Cargar horas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SOLICITUDES -->
+                <div class="requests-section-header">
+                    <h2 class="title text-fluid-xl">Horas cargadas</h2>
+                    <a class="see-all text-fluid-lg" href="#">Ver todo</a>
+                </div>
+
+                <div id="solicitudes_recientes" class="requests-list">
+                    <!-- Solicitudes dinámicas se cargan aquí -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Atención</h2>
+            <p class="modal-text">Estás por eliminar una carga de Horas. ¿Deseas continuar?</p>
+            <div class="modal-buttons">
+                <button id="cancel-delete" class="modal-button cancel">Cancelar</button>
+                <button id="confirm-delete" class="modal-button confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer-logos">
+            <img src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp"
+                alt="Logo Albace" />
+            <img src="assets/AxuraLogo.png" alt="Logo Axura" />
+        </div>
+    </footer>
+
+
+    <script>
+        // === Lazy Load para solicitudes ===
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const lazyCard = entry.target;
+                        const icon = lazyCard.querySelector('span[data-icon]');
+                        if (icon) {
+                            icon.textContent = icon.dataset.icon; // Carga el ícono real
+                            icon.removeAttribute('data-icon');
+                        }
+                        obs.unobserve(lazyCard); // Ya no lo observamos
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // Cada vez que agregás solicitudes dinámicas:
+            const container = document.getElementById('solicitudes_recientes');
+            const observerInit = new MutationObserver(() => {
+                document.querySelectorAll('.solicitud-card').forEach(card => observer.observe(card));
+            });
+
+            observerInit.observe(container, { childList: true });
+        });
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // === Detectar si es un celular ===
+            const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
+                || window.innerWidth < 640;
+
+            if (isMobile) {
+                document.body.classList.add('mobile-view');
+            }
+            fetch('/api/user')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nombre && data.id_usuario) {
+                        document.getElementById('usuario').textContent = data.nombre;
+                        // document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
+                    } else {
+                        window.location.href = '/login.html';
+                    }
+                })
+                .catch(() => window.location.href = '/login.html');
+
+            fetch('/api/solicitudes')
+                .then(response => response.json())
+                .then(solicitudes => {
+                    const container = document.getElementById('solicitudes_recientes');
+                    container.innerHTML = '';
+                    // (Las horas de hoy se calculan mediante /api/horas-hoy)
+                    if (!solicitudes.length) {
+                        container.innerHTML = '<p style="text-align: center; color: var(--text-color-light);">No hay solicitudes recientes.</p>';
+                        return;
+                    }
+                    solicitudes.forEach(solicitud => {
+                        const statusInfo = getStatusInfo(solicitud.estado);
+                        const fecha = new Date(solicitud.fecha).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+
+                        let horas = 'N/A';
+                        if (solicitud.horas_solicitadas) {
+                            const h = solicitud.horas_solicitadas.hours || 0;
+                            const m = solicitud.horas_solicitadas.minutes || 0;
+                            horas = `${h}h ${m}m`;
+                        }
+
+                        container.innerHTML += `
+                <div class="solicitud-card" data-id="${solicitud.id}">
+                    <div class="solicitud-icon-container ${statusInfo.bgColor}">
+                    <span class="material-symbols-outlined ${statusInfo.textColor}" data-icon="${statusInfo.icon}"></span>
+                    </div>
+                    <div class="solicitud-info">
+                    <p class="obra-name text-fluid-base">${solicitud.nombre_obra}</p>
+                    <p class="status-text text-fluid-sm">Cargada</p>
+                    </div>
+                    <div class="solicitud-details">
+                    <p class="date text-fluid-sm">${fecha}</p>
+                    <p class="hours text-fluid-base">${horas}</p>
+                    </div>
+                    <button class="delete-solicitud">
+                    <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+                `;
+
+                    });
+
+                    const modal = document.getElementById('delete-modal');
+                    const confirmDeleteBtn = document.getElementById('confirm-delete');
+                    const cancelDeleteBtn = document.getElementById('cancel-delete');
+                    let solicitudIdToDelete = null;
+
+                    container.addEventListener('click', (e) => {
+                        const deleteButton = e.target.closest('.delete-solicitud');
+                        if (deleteButton) {
+                            const card = deleteButton.closest('[data-id]');
+                            solicitudIdToDelete = card.dataset.id;
+                            modal.style.display = 'flex';
+                        }
+                    });
+
+                    cancelDeleteBtn.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                        solicitudIdToDelete = null;
+                    });
+
+                    confirmDeleteBtn.addEventListener('click', async () => {
+                        if (!solicitudIdToDelete) return;
+
+                        try {
+                            const res = await fetch(`/api/solicitudes/${solicitudIdToDelete}`, { method: 'DELETE' });
+                            const result = await res.json();
+
+                            if (res.ok && result.success) {
+                                document.querySelector(`.solicitud-card[data-id='${solicitudIdToDelete}']`).remove();
+                                alert('Solicitud eliminada correctamente.');
+                            } else {
+                                alert(result.message || 'Error eliminando la solicitud.');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('No se pudo conectar con el servidor.');
+                        } finally {
+                            modal.style.display = 'none';
+                            solicitudIdToDelete = null;
+                        }
+                    });
+
+                    window.addEventListener('click', (e) => {
+                        if (e.target == modal) {
+                            modal.style.display = 'none';
+                            solicitudIdToDelete = null;
+                        }
+                    });
+                })
+                .catch(error => console.error(error));
+
+            // Obtener horas pedidas hoy desde el servidor (tabla horas)
+            try {
+                fetch('/api/horas-hoy')
+                    .then(r => r.ok ? r.json() : Promise.reject('Error'))
+                    .then(rows => {
+                        const horasHoyEl = document.getElementById('horas_hoy');
+                        let totalMinutes = 0;
+                        rows.forEach(row => {
+                            const h = row.horas;
+                            let minutes = 0;
+                            if (h && typeof h === 'object' && (h.hours !== undefined || h.minutes !== undefined)) {
+                                const hrs = Number(h.hours) || 0;
+                                const mins = Number(h.minutes) || 0;
+                                minutes = hrs * 60 + mins;
+                            } else if (typeof h === 'string') {
+                                const m = h.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+                                if (m) {
+                                    minutes = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+                                } else {
+                                    const num = parseFloat(h.replace(',', '.'));
+                                    if (!isNaN(num)) minutes = Math.round(num * 60);
+                                }
+                            } else if (typeof h === 'number') {
+                                minutes = Math.round(h * 60);
+                            }
+                            totalMinutes += minutes;
+                        });
+                        const hrs = Math.floor(totalMinutes / 60);
+                        const mins = totalMinutes % 60;
+                        horasHoyEl.textContent = `Horas pedidas hoy: ${hrs}h ${mins}m`;
+                    })
+                    .catch(err => console.error('No se pudo obtener horas de hoy', err));
+            } catch (e) { console.error(e); }
+        });
+
+        function getStatusInfo(status) {
+            switch (status.toLowerCase()) {
+                case 'aprobado': return { icon: 'check', text: 'Aprobado', bgColor: 'status-aprobado-bg', textColor: 'status-aprobado-text' };
+                case 'rechazado': return { icon: 'close', text: 'Rechazado', bgColor: 'status-rechazado-bg', textColor: 'status-rechazado-text' };
+                default: return { icon: 'pending', text: 'Pendiente', bgColor: 'status-pendiente-bg', textColor: 'status-pendiente-text' };
+            }
+        }
+
+        document.getElementById('solicitar').addEventListener('click', () => {
+            window.location.href = '/empleado_solic.html';
+        });
+
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) window.location.href = '/login.html';
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

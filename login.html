@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeTrack - Iniciar Sesión</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+    :root {
+      --primary-color: #F26722;
+      --primary-color-hover: #ffa477;
+      --text-primary: #424242;
+      --text-secondary: #6B7280;
+      --bg-light: #F9FAFB;
+      --border-color: #D1D5DB;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+<div class="w-full max-w-sm mx-auto p-8">
+<div class="text-center mb-12">
+<!--src="https://www.metalurgicaalbace.com.ar/wp-content/uploads/2024/09/Logo-Albace-20.webp" -->
+<img 
+  src="assets/Logo2.webp" 
+  alt="Logo" 
+  class="mx-auto h-22 w-auto"
+/>
+
+<p class="mt-2 text-base text-[var(--text-secondary)]">Bienvenido de nuevo</p>
+</div>
+<form class="space-y-6" id="login-form">
+<div id="error-message" class="hidden text-red-500 text-sm text-center p-2 bg-red-100 rounded-md"></div>
+<div>
+<label class="sr-only" for="username">Nombre de usuario</label>
+<div class="relative">
+<input class="form-input block w-full rounded-md border-0 py-3.5 px-4 text-[var(--text-primary)] shadow-sm ring-1 ring-inset ring-[var(--border-color)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-inset focus:ring-[var(--primary-color)] sm:text-sm sm:leading-6 transition duration-150 ease-in-out" id="username" name="username" placeholder="Nombre de usuario o DNI" required="" type="text"/>
+</div>
+</div>
+<div>
+<label class="sr-only" for="password">Contraseña</label>
+<div class="relative">
+<input class="form-input block w-full rounded-md border-0 py-3.5 px-4 text-[var(--text-primary)] shadow-sm ring-1 ring-inset ring-[var(--border-color)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-inset focus:ring-[var(--primary-color)] sm:text-sm sm:leading-6 transition duration-150 ease-in-out" id="password" name="password" placeholder="Contraseña" required="" type="password"/>
+</div>
+</div>
+ 
+<div>
+<button  class="flex w-full justify-center rounded-md bg-[var(--primary-color)] px-3 py-3.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-[var(--primary-color-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-color)] transition duration-150 ease-in-out" type="submit">
+          Iniciar Sesión
+        </button>
+</div>
+</form>
+ 
+</div>
+
+<script>
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+ 
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMessageDiv = document.getElementById('error-message');
+
+        errorMessageDiv.classList.add('hidden');
+        errorMessageDiv.textContent = '';
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const result = await response.json();
+ 
+            if (response.ok && result.success) {
+                window.location.href = '/dashboard';
+            } else {
+                errorMessageDiv.textContent = result.message || 'Error al iniciar sesión.';
+                errorMessageDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorMessageDiv.textContent = 'No se pudo conectar con el servidor.';
+            errorMessageDiv.classList.remove('hidden');
+        }
+    });
+</script>
+
+</body></html>

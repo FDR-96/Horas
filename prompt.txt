@@ -1,0 +1,5 @@
+Necesito que realices algunos ajustes adicionales:
+En empleado_solic.html, el campo motivo debe pasar a ser opcional.
+Eliminá el campo comentarios adicionales.
+En el input de hora, quiero que solo permita ingresar horas y minutos, sin opción de seleccionar AM o PM (formato 24 h).
+El selector de obras debe comportarse como un treeview, de modo que las obras principales puedan expandirse o contraerse para mostrar sus subobras, facilitando la navegación y selección para los usuarios.

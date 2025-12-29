@@ -1,0 +1,443 @@
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;700;800" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Solicitud de Horas</title>
+<link rel="icon" href="data:image/x-icon;base64," type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+
+<style>
+  body {
+    font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+    font-size: 1.1rem;
+    background-color: #f9fafb;
+  }
+/* Igualar tamaño y padding del select "sector" al de los inputs */
+select#sector {
+  font-size: 1.05rem;       /* igual al input */
+  padding: 0.75rem 1rem;    /* igual a py-3 px-4 */
+  border-radius: 0.5rem;    /* rounded-lg */
+  border: 1px solid #d1d5db;/* gris-300 */
+  height: 3rem;             /* misma altura */
+  font-weight: 500;
+  background-color: white;  /* igual al input */
+}
+
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+
+  label {
+    font-size: 1rem;
+  }
+
+  input, select, textarea {
+    font-size: 1rem !important;
+  }
+
+  .form-input {
+    min-height: 3.2rem;
+  }
+
+  button {
+    font-size: 1.1rem;
+  }
+
+  /* Responsive form container */
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Mejorar visual de TomSelect */
+  .ts-control {
+    min-height: 3.2rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* flatpickr font-size */
+  .flatpickr-input {
+    font-size: 1rem !important;
+  }
+
+  /* --- jstree custom --- */
+  .jstree-container-ul .jstree-node {
+    margin-bottom: 2px;
+  }
+  .jstree-container-ul .jstree-node:nth-child(even) > .jstree-anchor {
+    background-color: #f3f4f6; /* gray-100 */
+  }
+  .jstree-default .jstree-anchor:hover {
+    background-color: #e5e7eb; /* gray-200 */
+  }
+  .jstree-default .jstree-clicked {
+    background-color: #dbeafe !important; /* blue-200 */
+  }
+  .jstree-default .jstree-search {
+    font-weight: bold;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      font-size: 1rem;
+    }
+    label {
+      font-size: 0.95rem;
+    }
+    .form-input {
+      min-height: 3rem;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.8rem 1rem;
+    }
+  }
+</style>
+</head>
+
+<body class="bg-gray-50">
+<div class="relative flex flex-col min-h-screen justify-between overflow-x-hidden">
+
+  <div class="flex flex-col">
+    <header class="flex items-center p-4">
+      <button id="back-button" class="text-gray-700">
+        <span class="material-symbols-outlined text-3xl">arrow_back_ios_new</span>
+      </button>
+      <h1 class="font-bold text-gray-900 flex-1 text-center pr-8">Carga de horas</h1>
+    </header>
+
+    <main class="flex-1 px-4 py-8 w-full">
+      <form id="solicitud-form" class="space-y-6" novalidate>
+        <div id="status-message" class="hidden text-center p-3 rounded-md text-base"></div>
+
+        <!-- Obra/Subobra -->
+        <div>
+          <label for="obra-dropdown" class="block font-medium text-gray-700 mb-2">Obra / Sub Obra *</label>
+          <div class="relative flex items-center w-full">
+            <input type="text" id="obra-dropdown" placeholder="Seleccionar obra/subobra..." readonly
+                   class="form-input w-full rounded-lg border-gray-300 py-3 pl-3 pr-10 text-gray-900 cursor-pointer focus:border-red-500 focus:ring-red-500"/>
+            <button type="button" id="open-obra-modal-btn" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <span class="material-symbols-outlined">search</span>
+            </button>
+            <input type="hidden" id="obra" name="obra" required>
+          </div>
+        </div>
+
+        <!-- Sector -->
+        <div>
+          <label for="sector" class="block font-medium text-gray-700 mb-2">Sector *</label>
+          <select id="sector" name="sector" required></select>
+        </div>
+
+        <!-- Fecha -->
+        <div>
+          <label for="fecha" class="block font-medium text-gray-700 mb-2">Fecha *</label>
+          <input id="fecha" name="fecha" type="text" placeholder="Seleccionar fecha"
+                 class="form-input w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500" required/>
+        </div>
+
+        <!-- Horas -->
+        <div>
+          <label for="horas" class="block font-medium text-gray-700 mb-2">Horas a cargar *</label>
+          <input id="horas" name="horas" type="text"
+                 class="form-input w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500" required/>
+        </div>
+
+        <!-- Motivo -->
+        <div>
+          <label for="razon" class="block font-medium text-gray-700 mb-2">Motivo</label>
+          <input id="razon" name="razon" placeholder="Ej. Proyecto urgente" type="text"
+                 class="form-input w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500"/>
+        </div>
+
+      </form>
+    </main>
+  </div>
+
+  <footer class="sticky bottom-0 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
+    <div class="flex justify-center p-4">
+      <button type="submit" form="solicitud-form"
+              class="flex w-full max-w-[480px] cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#F26722] text-white text-base font-bold leading-normal tracking-[0.015em] gap-2">
+        Cargar
+      </button>
+    </div>
+  </footer>
+</div>
+
+<!-- Modal de Búsqueda de Obra -->
+<!-- Modal de Búsqueda de Obra -->
+<div id="obra-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+  <div id="obra-modal-content" class="w-full max-w-md rounded-lg bg-white p-4 shadow-lg mx-4 flex flex-col" style="height: 80vh;">
+    <div class="flex-shrink-0">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Buscar Obra / Subobra</h2>
+
+      <!-- 🔍 Campo + botón de búsqueda -->
+      <div class="flex gap-2 mb-4">
+        <input
+          type="text"
+          id="obra-search-input"
+          placeholder="Escribe para filtrar..."
+          class="form-input flex-grow rounded-md border-gray-300 py-2 px-3 text-base focus:ring-red-500 focus:border-red-500"
+        >
+        <button
+          id="obra-search-btn"
+          class="bg-[#F26722] text-white px-4 py-2 rounded-md hover:bg-[#e25e1f] transition font-semibold"
+        >
+          Buscar
+        </button>
+      </div>
+    </div>
+
+    <div id="obra-tree-container" class="flex-grow overflow-auto border rounded-md"></div>
+
+    <div class="mt-4 flex-shrink-0">
+      <button id="close-obra-modal" class="w-full rounded-lg bg-gray-200 px-4 py-2.5 text-base font-semibold text-gray-800 hover:bg-gray-300">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<!-- Tu script actual mejorado -->
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const form = document.getElementById('solicitud-form');
+  const statusMessage = document.getElementById('status-message');
+  const obraInput = document.getElementById('obra');
+  const obraDropdown = document.getElementById('obra-dropdown');
+  const treeContainer = document.getElementById('obra-tree-container');
+
+  // --- Modal de Obra ---
+  const obraModal = document.getElementById('obra-modal');
+  const obraModalContent = document.getElementById('obra-modal-content');
+  const openObraModalBtn = document.getElementById('open-obra-modal-btn');
+  const closeObraModalBtn = document.getElementById('close-obra-modal');
+  const obraSearchInput = document.getElementById('obra-search-input');
+
+  // --- Flatpickr ---
+  flatpickr("#fecha", {
+    dateFormat: "Y-m-d",
+    defaultDate: new Date(),
+    altInput: true,
+    altFormat: "d/m/Y",
+    allowInput: true,
+    maxDate: new Date(),
+  });
+ flatpickr("#horas", {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: "H:i",
+  time_24hr: true,
+  minuteIncrement: 5,        // pasos de 5 min (ajustable)
+  defaultHour: 8,            // hora inicial sugerida
+  disableMobile: true        // 🔥 fuerza Flatpickr incluso en móviles
+});
+
+  // --- Cargar obras/subobras ---
+  let dataObras = [];
+  try {
+    const res = await fetch('/api/obras-jerarquia');
+    dataObras = await res.json();
+  } catch (err) { console.error('Error cargando obras', err); }
+
+  // --- Preparar datos para jsTree ---
+  const treeData = dataObras
+    .filter(obra => obra.obra && obra.obra.trim() !== "")
+    .sort((a, b) => a.obra.localeCompare(b.obra))
+    .map(obra => {
+      const validSubobras = (obra.subobras || [])
+        .filter(sub => sub.obra && sub.obra.trim() !== "")
+        .sort((a, b) => a.obra.localeCompare(b.obra));
+
+      return {
+        id: `obra-${obra.id_sistema}`,
+        text: obra.obra,
+        state: { opened: false },
+        children: validSubobras.map(sub => ({
+          id: `subobra-${sub.id_sistema}`,
+          text: sub.obra,
+        }))
+      };
+    });
+
+  // --- Inicializar jsTree ---
+  $(treeContainer).jstree({
+    core: {
+        data: treeData,
+        multiple: false,
+        themes: {
+            icons: false // Desactivar íconos
+        }
+    },
+    plugins: ["search", "wholerow"],
+    search: {
+        show_only_matches: true,
+        show_only_matches_children: true,
+        case_insensitive: true
+    }
+  }).on('ready.jstree', function (e, data) {
+      data.instance.open_all();
+      // Restaurar última obra/subobra seleccionada (si existe)
+      try {
+        const lastNodeId = localStorage.getItem('last_obra_node');
+        const lastDisplay = localStorage.getItem('last_obra_display');
+        const tree = data.instance;
+        if (lastNodeId && tree.get_node(lastNodeId)) {
+          const node = tree.get_node(lastNodeId);
+          if (node.children.length === 0) {
+            // subobra
+            const parent = tree.get_parent(node);
+            const parentText = parent && parent !== '#' ? tree.get_node(parent).text : '';
+            obraDropdown.value = lastDisplay || (parentText ? parentText + ' / ' + node.text : node.text);
+            obraInput.value = lastNodeId.split('-')[1];
+          } else {
+            // obra
+            obraDropdown.value = lastDisplay || node.text;
+            obraInput.value = lastNodeId.split('-')[1];
+          }
+        } else if (lastDisplay) {
+          obraDropdown.value = lastDisplay;
+        }
+      } catch (e) { console.error('No se pudo restaurar obra seleccionada', e); }
+  });
+
+  // --- Lógica del Modal de Obra ---
+  const openModal = () => {
+      const inputRect = obraDropdown.getBoundingClientRect();
+      obraModalContent.style.width = `${inputRect.width}px`;
+      obraModal.classList.remove('hidden');
+      obraSearchInput.focus();
+  };
+  openObraModalBtn.addEventListener('click', openModal);
+  obraDropdown.addEventListener('click', openModal);
+
+  closeObraModalBtn.addEventListener('click', () => obraModal.classList.add('hidden'));
+  window.addEventListener('click', (e) => {
+      if (e.target == obraModal) obraModal.classList.add('hidden');
+  });
+
+  // --- Nueva búsqueda optimizada ---
+  const obraSearchBtn = document.getElementById('obra-search-btn');
+  let lastSearch = "";
+
+  const ejecutarBusqueda = () => {
+    const term = obraSearchInput.value.trim();
+    if (term === lastSearch) return; // evita búsquedas repetidas
+    lastSearch = term;
+
+    const tree = $(treeContainer).jstree(true);
+    tree.clear_search();
+    if (term.length === 0) return;
+
+    // 🔍 Ejecuta la búsqueda rápida
+    tree.search(term);
+
+    // Abre nodos relevantes (mejor experiencia)
+    setTimeout(() => {
+      tree.get_container().find(".jstree-search").each(function() {
+        const nodeId = $(this).closest("li").attr("id");
+        tree.open_node(nodeId);
+      });
+    }, 100);
+  };
+
+  obraSearchBtn.addEventListener('click', ejecutarBusqueda);
+  obraSearchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      ejecutarBusqueda();
+    }
+  });
+
+
+  $(treeContainer).on("select_node.jstree", (e, data) => {
+    const node = data.node;
+    const tree = $(treeContainer).jstree(true);
+    if (node.children.length === 0) {
+      let displayText = node.text;
+      const parent = tree.get_parent(node);
+      if (parent && parent !== "#") {
+        displayText = tree.get_node(parent).text + " / " + node.text;
+      }
+      obraDropdown.value = displayText;
+      obraInput.value = node.id.split('-')[1];
+      try { localStorage.setItem('last_obra_node', node.id); localStorage.setItem('last_obra_display', displayText); } catch(e) {}
+      obraModal.classList.add('hidden');
+    } else {
+      tree.toggle_node(node);
+    }
+  });
+
+  // --- TomSelect ---
+  const sectorSelect = new TomSelect("#sector", {
+    sortField: { field: 'text', direction: 'asc' },
+    placeholder: 'Seleccionar sector...'
+  });
+  try {
+    const res = await fetch('/api/sectores');
+    const sectores = await res.json();
+    sectores.forEach(s => sectorSelect.addOption({ value: s.id_sistema, text: s.sector }));
+    // Restaurar sector seleccionado previamente
+    try {
+      const lastSector = localStorage.getItem('last_sector');
+      if (lastSector) sectorSelect.setValue(lastSector);
+    } catch(e) { console.error(e); }
+    // Guardar cambios de sector
+    try { sectorSelect.on('change', value => localStorage.setItem('last_sector', value)); } catch(e) {}
+  } catch (err) { console.error('Error cargando sectores', err); }
+
+  // --- Envío ---
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    if (!obraInput.value) {
+      alert("Debe seleccionar una obra o subobra.");
+      return;
+    }
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    data.obraid = parseInt(obraInput.value);
+    data.subobraid = null;
+
+    try {
+      const r = await fetch('/api/solicitar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+      const result = await r.json();
+      statusMessage.className = 'text-center p-3 rounded-md text-base'; // Reset classes
+      if (r.ok && result.success) {
+        statusMessage.textContent = 'Solicitud cargada con éxito. Redirigiendo...';
+        statusMessage.classList.add('bg-green-100','text-green-700');
+        setTimeout(()=>window.location.href='/empleado_dash.html', 1000);
+      } else {
+        statusMessage.textContent = result.message || 'Error al enviar la solicitud.';
+        statusMessage.classList.add('bg-red-100','text-red-700');
+      }
+    } catch(err) {
+      console.error(err);
+      statusMessage.textContent = 'No se pudo conectar con el servidor.';
+      statusMessage.classList.add('bg-red-100','text-red-700');
+    }
+  });
+
+  document.getElementById('back-button').addEventListener('click', () => window.location.href = '/empleado_dash.html');
+});
+</script>
+</body>
+</html>
