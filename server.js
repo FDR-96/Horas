@@ -20,6 +20,8 @@ const pool = new Pool({
 // --- Middleware ---
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 app.use(session({
@@ -76,7 +78,7 @@ app.post('/login', async (req, res) => {
                 nombre: user.nombre,
                 rol: user.rol
             };
- 
+            
             if (user.estado == true || user.estado === 'true' || user.estado === 't' || user.estado === 1) {
                 res.json({ success: true });
             } else {
