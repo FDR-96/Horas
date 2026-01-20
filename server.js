@@ -74,7 +74,7 @@ app.post('/login', async (req, res) => {
             req.session.user = {
                 id: user.id_sistema,
                 nombre: user.nombre,
-                rol: user.rol,
+                rol: user.rol
             };
             console.log('Estado del usuario:', user.estado);
             console.log('Tipo de estado:', typeof user.estado);
