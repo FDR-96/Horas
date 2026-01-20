@@ -603,7 +603,7 @@
                             <p>Horas pedidas hoy:</p>
                         </div>
                         <div class="user-details">
-                            <p id="horas_hoy" class="id text-fluid-lg">0h 0m</p>
+                            <p id="horas_hoy" class="name  text-fluid-xl">0h 0m</p>
                         </div>
                     </div>
                     <div class="request-button-container">
@@ -689,10 +689,11 @@
                         document.getElementById('usuario').textContent = data.nombre;
                         // document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
                     } else {
-                        window.location.href = '/login.html';
+                        //window.location.href = '/login.html';
                     }
                 })
-                .catch(() => window.location.href = '/login.html');
+                .catch(() => console.error('No se pudo obtener el usuario'));
+                //.catch(() => window.location.href = '/login.html');
 
             fetch('/api/solicitudes')
                 .then(response => response.json())

@@ -66,7 +66,7 @@ app.post('/login', async (req, res) => {
     }
 
     try {
-        const query = 'SELECT id_sistema, nombre, rol FROM public.personal WHERE usuario = $1 AND dni = $2';
+        const query = 'SELECT id_sistema, nombre, rol, estado FROM public.personal WHERE usuario = $1 AND dni = $2';
         const result = await pool.query(query, [username, password]);
 
         if (result.rows.length > 0) {
@@ -74,9 +74,13 @@ app.post('/login', async (req, res) => {
             req.session.user = {
                 id: user.id_sistema,
                 nombre: user.nombre,
-                rol: user.rol
+                rol: user.rol,
             };
-            res.json({ success: true });
+            if (user.estado == true) {
+                res.json({ success: true });
+            } else {
+                res.status(403).json({ success: false, message: 'Usuario inactivo. Contacte al administrador.' });
+            }
         } else {
             res.status(401).json({ success: false, message: 'Credenciales incorrectas.' });
         }
@@ -98,7 +102,7 @@ app.delete('/api/solicitudes/:id', checkAuth, async (req, res) => {
     const id = parseInt(req.params.id);
     const personalId = req.session.user.id;
 
-    if(isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
 
     try {
         const result = await pool.query(
@@ -106,10 +110,10 @@ app.delete('/api/solicitudes/:id', checkAuth, async (req, res) => {
             [id, personalId]
         );
 
-        if(result.rowCount === 0) return res.status(404).json({ message: 'Solicitud no encontrada' });
+        if (result.rowCount === 0) return res.status(404).json({ message: 'Solicitud no encontrada' });
 
         res.json({ success: true });
-    } catch(err) {
+    } catch (err) {
         console.error('Error eliminando solicitud:', err);
         res.status(500).json({ message: 'Error eliminando la solicitud' });
     }
@@ -245,7 +249,7 @@ app.post('/api/solicitar', checkAuth, async (req, res) => {
 
         const parentId = obraResult.rows[0].parent_id;
         const finalObraId = parentId || obraId;
-        const subObraId = parentId ? obraId : null;
+        const subObraId = parentId ? obraId : 0;
 
         const query = `
             INSERT INTO public.horas 
