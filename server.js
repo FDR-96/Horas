@@ -76,6 +76,8 @@ app.post('/login', async (req, res) => {
                 nombre: user.nombre,
                 rol: user.rol,
             };
+            console.log('Estado del usuario:', user.estado);
+            console.log('Tipo de estado:', typeof user.estado);
             if (user.estado == true) {
                 res.json({ success: true });
             } else {
