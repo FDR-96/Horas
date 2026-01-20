@@ -76,10 +76,8 @@ app.post('/login', async (req, res) => {
                 nombre: user.nombre,
                 rol: user.rol
             };
-            console.log('--- Debug Login ---');
-            console.log('Usuario encontrado:', user);
-            console.log('¿Es estado estrictamente true?:', user.estado === true);
-            if (user.estado == true) {
+ 
+            if (user.estado == true || user.estado === 'true' || user.estado === 't' || user.estado === 1) {
                 res.json({ success: true });
             } else {
                 res.status(403).json({ success: false, message: 'Usuario inactivo. Contacte al administrador.' });
