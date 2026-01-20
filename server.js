@@ -76,8 +76,9 @@ app.post('/login', async (req, res) => {
                 nombre: user.nombre,
                 rol: user.rol
             };
-            console.log('Estado del usuario:', user.estado);
-            console.log('Tipo de estado:', typeof user.estado);
+            console.log('--- Debug Login ---');
+            console.log('Usuario encontrado:', user);
+            console.log('¿Es estado estrictamente true?:', user.estado === true);
             if (user.estado == true) {
                 res.json({ success: true });
             } else {
