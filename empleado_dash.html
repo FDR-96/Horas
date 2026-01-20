@@ -820,7 +820,7 @@
                         });
                         const hrs = Math.floor(totalMinutes / 60);
                         const mins = totalMinutes % 60;
-                        horasHoyEl.textContent = `Horas pedidas hoy: ${hrs}h ${mins}m`;
+                        horasHoyEl.textContent = `${hrs}h ${mins}m`;
                     })
                     .catch(err => console.error('No se pudo obtener horas de hoy', err));
             } catch (e) { console.error(e); }
