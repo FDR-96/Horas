@@ -68,7 +68,7 @@ app.post('/login', async (req, res) => {
     try {
         const query = 'SELECT id_sistema, nombre, rol, estado FROM public.personal WHERE usuario = $1 AND dni = $2';
         const result = await pool.query(query, [username, password]);
-
+        console.log('Resultado de la consulta de login:', result.rows);
         if (result.rows.length > 0) {
             const user = result.rows[0];
             req.session.user = {
