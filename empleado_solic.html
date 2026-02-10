@@ -248,32 +248,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   disableMobile: true        // 🔥 fuerza Flatpickr incluso en móviles
 });
 
-  // --- Cargar obras/subobras ---
-  let dataObras = [];
-  try {
-    const res = await fetch('/api/obras-jerarquia');
-    dataObras = await res.json();
-  } catch (err) { console.error('Error cargando obras', err); }
-
-  // --- Preparar datos para jsTree ---
-  const treeData = dataObras
-    .filter(obra => obra.obra && obra.obra.trim() !== "")
-    .sort((a, b) => a.obra.localeCompare(b.obra))
-    .map(obra => {
-      const validSubobras = (obra.subobras || [])
-        .filter(sub => sub.obra && sub.obra.trim() !== "")
-        .sort((a, b) => a.obra.localeCompare(b.obra));
-
+// --- Función Recursiva para transformar datos ---
+const formatObrasParaTree = (nodos) => {
+  return nodos
+    .filter(n => n.obra && n.obra.trim() !== "") // Limpieza de nombres vacíos
+    .sort((a, b) => a.obra.localeCompare(b.obra)) // Orden alfabético
+    .map(n => {
+      const tieneHijos = n.subobras && n.subobras.length > 0;
       return {
-        id: `obra-${obra.id_sistema}`,
-        text: obra.obra,
+        id: tieneHijos ? `obra-${n.id_sistema}` : `subobra-${n.id_sistema}`,
+        text: n.obra,
         state: { opened: false },
-        children: validSubobras.map(sub => ({
-          id: `subobra-${sub.id_sistema}`,
-          text: sub.obra,
-        }))
+        // Aquí la magia: se llama a sí misma para los hijos
+        children: tieneHijos ? formatObrasParaTree(n.subobras) : []
       };
     });
+};
+
+    // --- Carga y Renderizado ---
+  let dataObras = [];
+  try {
+    const response = await fetch('/api/obras-jerarquia');
+    dataObras = await response.json();
+  } catch (err) { 
+    console.error('Error cargando obras', err); 
+  }
+
+  const treeData = formatObrasParaTree(dataObras);
 
   // --- Inicializar jsTree ---
   $(treeContainer).jstree({

@@ -169,14 +169,12 @@ app.get('/api/obras', checkAuth, async (req, res) => {
 });
 app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
     try {
-        // 1. Query ajustada para que NULL y 0 aparezcan primero
         const query = `
             SELECT id_sistema, obra, parent_id 
             FROM public.obras 
             WHERE estado = true 
             ORDER BY 
                 (CASE WHEN parent_id IS NULL OR parent_id = 0 THEN 0 ELSE 1 END), 
-                parent_id, 
                 obra
         `;
         
@@ -185,29 +183,31 @@ app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
         const hierarchy = [];
         const map = {};
 
-        // 2. Primera pasada: creamos el mapa
+        // 1. Mapear todos los objetos
         obras.forEach(o => {
             map[o.id_sistema] = { ...o, subobras: [] };
         });
 
-        // 3. Segunda pasada: construimos la jerarquía
+        // 2. Construir la estructura
         obras.forEach(o => {
-            // Verificamos explícitamente que tenga un padre válido (ni NULL ni 0)
-            const tienePadreValido = o.parent_id !== null && o.parent_id !== 0;
-
-            if (tienePadreValido && map[o.parent_id]) {
-                // Es una subobra: la metemos en el array del padre
-                map[o.parent_id].subobras.push(map[o.id_sistema]);
+            const esRaiz = o.parent_id === null || o.parent_id === 0;
+            
+            if (!esRaiz) {
+                // Si tiene un padre y el padre existe en nuestro mapa activo
+                if (map[o.parent_id]) {
+                    map[o.parent_id].subobras.push(map[o.id_sistema]);
+                }
+                // Si el padre NO existe (está en false o no está en la lista), 
+                // NO lo pusheamos a hierarchy para evitar que aparezca como raíz.
             } else {
-                // Es una obra raíz (NULL o 0)
                 hierarchy.push(map[o.id_sistema]);
             }
         });
 
         res.json(hierarchy);
     } catch (error) {
-        console.error('Error fetching obras hierarchy:', error);
-        res.status(500).json({ message: 'Error al obtener la jerarquía de obras.' });
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error en la jerarquía.' });
     }
 });
 
