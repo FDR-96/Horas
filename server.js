@@ -167,25 +167,39 @@ app.get('/api/obras', checkAuth, async (req, res) => {
         res.status(500).json({ message: 'Error al obtener las obras.' });
     }
 });
-
-// Get all "obras" in a hierarchical structure
 app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
     try {
-        const result = await pool.query('SELECT id_sistema, obra, parent_id FROM public.obras WHERE estado = true ORDER BY parent_id NULLS FIRST, obra');
+        // 1. Query ajustada para que NULL y 0 aparezcan primero
+        const query = `
+            SELECT id_sistema, obra, parent_id 
+            FROM public.obras 
+            WHERE estado = true 
+            ORDER BY 
+                (CASE WHEN parent_id IS NULL OR parent_id = 0 THEN 0 ELSE 1 END), 
+                parent_id, 
+                obra
+        `;
+        
+        const result = await pool.query(query);
         const obras = result.rows;
         const hierarchy = [];
         const map = {};
 
-        // First pass: create a map of all obras by their ID
+        // 2. Primera pasada: creamos el mapa
         obras.forEach(o => {
             map[o.id_sistema] = { ...o, subobras: [] };
         });
 
-        // Second pass: build the hierarchy
+        // 3. Segunda pasada: construimos la jerarquía
         obras.forEach(o => {
-            if (o.parent_id && map[o.parent_id]) {
+            // Verificamos explícitamente que tenga un padre válido (ni NULL ni 0)
+            const tienePadreValido = o.parent_id !== null && o.parent_id !== 0;
+
+            if (tienePadreValido && map[o.parent_id]) {
+                // Es una subobra: la metemos en el array del padre
                 map[o.parent_id].subobras.push(map[o.id_sistema]);
             } else {
+                // Es una obra raíz (NULL o 0)
                 hierarchy.push(map[o.id_sistema]);
             }
         });
