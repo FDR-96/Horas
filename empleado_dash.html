@@ -685,8 +685,8 @@
             fetch('/api/user')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.nombre && data.id_usuario) {
-                        document.getElementById('usuario').textContent = data.nombre;
+                    if (data.usuario && data.id_usuario) {
+                        document.getElementById('usuario').textContent = data.usuario;
                         // document.getElementById('id_usuario').textContent = `ID Empleado: ${data.id_usuario}`;
                     } else {
                         window.location.href = '/login.html';
@@ -707,7 +707,8 @@
                     }
                     solicitudes.forEach(solicitud => {
                         const statusInfo = getStatusInfo(solicitud.estado);
-                        const fecha = new Date(solicitud.fecha).toLocaleDateString('es-AR', {
+                        const fechaObj = new Date(solicitud.fecha + 'T00:00:00');
+                        const fecha = fechaObj.toLocaleDateString('es-AR', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric'

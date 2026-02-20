@@ -68,7 +68,7 @@ app.post('/login', async (req, res) => {
     }
 
     try {
-        const query = 'SELECT id_sistema, nombre, rol, estado FROM public.personal WHERE usuario = $1 AND dni = $2';
+        const query = 'SELECT id_sistema, nombre, usuario, rol, estado FROM public.personal WHERE usuario = $1 AND dni = $2';
         const result = await pool.query(query, [username, password]);
         console.log('Resultado de la consulta de login:', result.rows);
         if (result.rows.length > 0) {
@@ -76,6 +76,7 @@ app.post('/login', async (req, res) => {
             req.session.user = {
                 id: user.id_sistema,
                 nombre: user.nombre,
+                usuario: user.usuario,
                 rol: user.rol
             };
             
@@ -96,6 +97,7 @@ app.post('/login', async (req, res) => {
 // Get user info for dashboard
 app.get('/api/user', checkAuth, (req, res) => {
     res.json({
+        usuario: req.session.user.usuario,
         nombre: req.session.user.nombre,
         id_usuario: req.session.user.id
     });
