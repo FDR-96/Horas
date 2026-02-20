@@ -640,8 +640,7 @@
     </div>
     <footer class="footer">
         <div class="footer-logos">
-            <img src="assets/Logo.webp"
-                alt="Logo Albace" />
+            <img src="assets/Logo.webp" alt="Logo Albace" />
             <img src="assets/AxuraLogo.png" alt="Logo Axura" />
         </div>
     </footer>
@@ -707,12 +706,17 @@
                     }
                     solicitudes.forEach(solicitud => {
                         const statusInfo = getStatusInfo(solicitud.estado);
-                        const fechaObj = new Date(solicitud.fecha + 'T00:00:00');
-                        const fecha = fechaObj.toLocaleDateString('es-AR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        });
+
+                        let fecha = '---';
+                        if (solicitud.fecha) {
+                            const fechaLimpia = solicitud.fecha.split('T')[0];
+                            const fechaObj = new Date(fechaLimpia + 'T00:00:00');
+                            fecha = isNaN(fechaObj.getTime()) ? '---' : fechaObj.toLocaleDateString('es-AR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        }
 
                         let horas = 'N/A';
                         if (solicitud.horas_solicitadas) {
