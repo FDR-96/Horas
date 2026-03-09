@@ -146,8 +146,8 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
             -- Join opcional con la subobra (si existe)
             LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
             WHERE h.personalid = $1 and            
-                h.fechacarga >= CURRENT_DATE - INTERVAL '1 day'
-                AND h.fechacarga <= CURRENT_DATE
+                h.fechacarga::date >= CURRENT_DATE - INTERVAL '1 day'
+                AND h.fechacarga::date <= CURRENT_DATE
             ORDER BY 
                 h.fechacarga DESC;
 
