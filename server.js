@@ -147,7 +147,10 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
             LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
             WHERE h.personalid = $1
             ORDER BY 
-                h.fechacarga DESC LIMIT 500;
+                h.fechacarga DESC LIMIT 10
+                AND h.fecha = CURRENT_DATE
+            ORDER BY 
+                h.fechacarga DESC;
 
         `;
         const result = await pool.query(query, [personalId]);
