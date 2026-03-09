@@ -79,7 +79,7 @@ app.post('/login', async (req, res) => {
                 usuario: user.usuario,
                 rol: user.rol
             };
-            
+
             if (user.estado == true || user.estado === 'true' || user.estado === 't' || user.estado === 1) {
                 res.json({ success: true });
             } else {
@@ -145,10 +145,9 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
             JOIN public.obras obra ON h.obraid = obra.id_sistema
             -- Join opcional con la subobra (si existe)
             LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
-            WHERE h.personalid = $1
-            ORDER BY 
-                h.fechacarga DESC LIMIT 10
-                AND h.fecha = CURRENT_DATE
+            WHERE h.personalid = $1 and            
+                h.fechacarga >= CURRENT_DATE - INTERVAL '1 day'
+                AND h.fechacarga <= CURRENT_DATE
             ORDER BY 
                 h.fechacarga DESC;
 
@@ -182,7 +181,7 @@ app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
                 (CASE WHEN parent_id IS NULL OR parent_id = 0 THEN 0 ELSE 1 END), 
                 obra
         `;
-        
+
         const result = await pool.query(query);
         const obras = result.rows;
         const hierarchy = [];
@@ -196,7 +195,7 @@ app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
         // 2. Construir la estructura
         obras.forEach(o => {
             const esRaiz = o.parent_id === null || o.parent_id === 0;
-            
+
             if (!esRaiz) {
                 // Si tiene un padre y el padre existe en nuestro mapa activo
                 if (map[o.parent_id]) {
