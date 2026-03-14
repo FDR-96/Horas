@@ -130,27 +130,36 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
     const personalId = req.session.user.id;
     try {
         const query = `
-           SELECT
-                h.id,
-                h.estado,
-                -- Concatenamos obra y subobra si existe
-                CASE
-                    WHEN subobra.obra IS NOT NULL THEN obra.obra || ' / ' || subobra.obra
-                    ELSE obra.obra
-                END AS nombre_obra,
-                h.fecha,
-                h.horas AS horas_solicitadas
-            FROM public.horas h
-            -- Join con la obra principal
-            JOIN public.obras obra ON h.obraid = obra.id_sistema
-            -- Join opcional con la subobra (si existe)
-            LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
-            WHERE h.personalid = $1 and            
-                h.fechacarga::date >= CURRENT_DATE - INTERVAL '1 day'
-                AND h.fechacarga::date <= CURRENT_DATE
-            ORDER BY 
-                h.fechacarga DESC;
-
+         SELECT
+            h.id,
+            h.estado,
+            -- Concatenamos obra y subobra si existe
+            CASE
+                WHEN subobra.obra IS NOT NULL THEN obra.obra || ' / ' || subobra.obra
+                ELSE obra.obra
+            END AS nombre_obra,
+            h.fecha,
+            h.horas AS horas_solicitadas
+        FROM public.horas h
+        -- Join con la obra principal
+        JOIN public.obras obra ON h.obraid = obra.id_sistema
+        -- Join opcional con la subobra (si existe)
+        LEFT JOIN public.obras subobra ON h.subobraid = subobra.id_sistema
+        WHERE h.personalid = $1 
+        AND (
+            -- Condición 1: Traer lo que se cargó hoy (si es que hay algo)
+            h.fechacarga::date = CURRENT_DATE 
+            OR 
+            -- Condición 2: Traer lo del último día histórico registrado
+            h.fechacarga::date = (
+                SELECT MAX(h2.fechacarga::date)
+                FROM public.horas h2
+                WHERE h2.personalid = $1 
+                    AND h2.fechacarga::date < CURRENT_DATE
+            )
+        )
+        ORDER BY 
+            h.fechacarga DESC;
         `;
         const result = await pool.query(query, [personalId]);
         res.json(result.rows);
