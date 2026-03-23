@@ -139,6 +139,7 @@ app.get('/api/solicitudes', checkAuth, async (req, res) => {
                 ELSE obra.obra
             END AS nombre_obra,
             h.fecha,
+            h.fechacarga::date AS fecha_carga,
             h.horas AS horas_solicitadas
         FROM public.horas h
         -- Join con la obra principal
@@ -268,6 +269,22 @@ app.post('/api/solicitar', checkAuth, async (req, res) => {
     // Basic validation
     if (!obraId || !sector || !fecha || !horas) {
         return res.status(400).json({ message: 'Por favor, complete todos los campos obligatorios.' });
+    }
+
+    // Fecha permitida: desde hace 7 dias hasta hoy.
+    const fechaSolicitada = new Date(`${fecha}T00:00:00`);
+    if (Number.isNaN(fechaSolicitada.getTime())) {
+        return res.status(400).json({ message: 'La fecha seleccionada no es valida.' });
+    }
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const fechaMinima = new Date(hoy);
+    fechaMinima.setDate(fechaMinima.getDate() - 7);
+
+    if (fechaSolicitada < fechaMinima || fechaSolicitada > hoy) {
+        return res.status(400).json({ message: 'La fecha debe estar dentro de los ultimos 7 dias.' });
     }
 
     try {
