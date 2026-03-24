@@ -705,7 +705,9 @@
                     }
 
                     const ahora = new Date();
-                    const hoyString = ahora.toISOString().split('T')[0];
+                    // Construir fecha local en formato YYYY-MM-DD (sin usar ISO que convierte a UTC)
+                    const pad = (n) => String(n).padStart(2, '0');
+                    const hoyLocal = ahora.getFullYear() + '-' + pad(ahora.getMonth() + 1) + '-' + pad(ahora.getDate());
 
                     solicitudes.forEach(solicitud => {
                         // MOVIDO ADENTRO: Ahora sí reconoce la solicitud individual
@@ -719,7 +721,7 @@
                         const fechaTrabajo = solicitud.fecha
                             ? String(solicitud.fecha).split('T')[0]
                             : null;
-                        esHoy = (fechaCarga === hoyString || fechaTrabajo === hoyString);
+                        esHoy = (fechaCarga === hoyLocal || fechaTrabajo === hoyLocal);
 
                         if (solicitud.fecha) {
                             const fechaLimpia = fechaTrabajo;
