@@ -674,6 +674,11 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Fecha local en YYYY-MM-DD (evita desfase UTC)
+            const _ahora = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const hoyLocal = _ahora.getFullYear() + '-' + pad(_ahora.getMonth() + 1) + '-' + pad(_ahora.getDate());
+
             // === Detectar si es un celular ===
             const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
                 || window.innerWidth < 640;
@@ -703,11 +708,6 @@
                         container.innerHTML = '<p style="text-align: center; color: var(--text-color-light);">No hay solicitudes recientes.</p>';
                         return;
                     }
-
-                    const ahora = new Date();
-                    // Construir fecha local en formato YYYY-MM-DD (sin usar ISO que convierte a UTC)
-                    const pad = (n) => String(n).padStart(2, '0');
-                    const hoyLocal = ahora.getFullYear() + '-' + pad(ahora.getMonth() + 1) + '-' + pad(ahora.getDate());
 
                     solicitudes.forEach(solicitud => {
                         // MOVIDO ADENTRO: Ahora sí reconoce la solicitud individual
