@@ -251,9 +251,15 @@ app.get('/api/sectores', checkAuth, async (req, res) => {
 // Get hours for the logged-in user for today
 app.get('/api/horas-hoy', checkAuth, async (req, res) => {
     const personalId = req.session.user.id;
+    // Acepta fecha local del cliente para evitar desfases por zona horaria
+    const fechaParam = req.query.fecha;
+    const fechaValida = fechaParam && /^\d{4}-\d{2}-\d{2}$/.test(fechaParam) ? fechaParam : null;
     try {
-        const query = `SELECT fecha, horas FROM public.horas WHERE personalid = $1 AND DATE(fecha) = CURRENT_DATE`;
-        const result = await pool.query(query, [personalId]);
+        const query = fechaValida
+            ? `SELECT fecha, horas FROM public.horas WHERE personalid = $1 AND fecha::date = $2::date`
+            : `SELECT fecha, horas FROM public.horas WHERE personalid = $1 AND DATE(fecha) = CURRENT_DATE`;
+        const params = fechaValida ? [personalId, fechaValida] : [personalId];
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching horas hoy:', error);

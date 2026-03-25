@@ -820,7 +820,7 @@
 
             // Obtener horas pedidas hoy desde el servidor (tabla horas)
             try {
-                fetch('/api/horas-hoy')
+                fetch(`/api/horas-hoy?fecha=${hoyLocal}`)
                     .then(r => r.ok ? r.json() : Promise.reject('Error'))
                     .then(rows => {
                         const horasHoyEl = document.getElementById('horas_hoy');
