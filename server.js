@@ -3,18 +3,32 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const { Pool } = require('pg');
 const path = require('path');
+const crypto = require('crypto');
+
+// --- Configuración (.env en la raíz, no versionado) ---
+try {
+    process.loadEnvFile(path.join(__dirname, '.env'));
+} catch (err) {
+    if (err.code !== 'ENOENT') throw err; // sin archivo: se usan las variables del entorno
+}
+
+const requiredEnv = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'SESSION_SECRET'];
+const missingEnv = requiredEnv.filter(name => !process.env[name]);
+if (missingEnv.length) {
+    console.error(`Faltan variables de entorno en .env: ${missingEnv.join(', ')}`);
+    process.exit(1);
+}
 
 const app = express();
-const port = 3001;
+const port = Number(process.env.PORT) || 3001;
 
 // --- Database Configuration ---
-// IMPORTANT: Move these details to a .env file for production
 const pool = new Pool({
-    user: 'postgres',
-    host: '192.168.10.8',
-    database: 'Horas',
-    password: 'Meta#4545',
-    port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: Number(process.env.DB_PORT) || 5432,
 });
 
 // --- Middleware ---
@@ -25,14 +39,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 app.use(session({
-    secret: 'aASDaskllkdasC212m3namssadd', // IMPORTANT: Change this to a long, random string
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // For development. Set to true if using HTTPS in production
 }));
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+// Serve static files from the root directory.
+// Nunca servir archivos bajo /api/ (en cualquier capitalización): ahí vive la API
+// Python con su .env y la base de alertas. Esas rutas siguen a los endpoints.
+const serveStatic = express.static(__dirname);
+app.use((req, res, next) => (/^\/api(\/|$)/i.test(req.path) ? next() : serveStatic(req, res, next)));
 
 // --- Authentication Middleware ---
 const checkAuth = (req, res, next) => {
@@ -42,6 +59,88 @@ const checkAuth = (req, res, next) => {
         res.redirect('/login.html');
     }
 };
+
+// --- Panel de administración ---
+// Login con ADMIN_USER / ADMIN_PASSWORD del .env. El panel nunca ve la API key:
+// sus llamadas van a /admin-api/* y este servidor las reenvía a la API Python.
+const adminConfigured = () => Boolean(process.env.ADMIN_USER && process.env.ADMIN_PASSWORD);
+
+const safeEqual = (a, b) => crypto.timingSafeEqual(
+    crypto.createHash('sha256').update(String(a)).digest(),
+    crypto.createHash('sha256').update(String(b)).digest()
+);
+
+// Bloqueo simple por IP: 5 intentos fallidos -> 15 minutos.
+const loginFails = new Map();
+const LOGIN_MAX_FAILS = 5;
+const LOGIN_LOCK_MS = 15 * 60 * 1000;
+
+const checkAdmin = (req, res, next) => {
+    if (req.session.admin) return next();
+    res.status(401).json({ detail: 'Sesión de administrador requerida.' });
+};
+
+app.get('/admin-auth/session', (req, res) => {
+    res.json({ authenticated: Boolean(req.session.admin), usuario: req.session.admin?.usuario || null });
+});
+
+app.post('/admin-auth/login', (req, res) => {
+    if (!adminConfigured()) {
+        return res.status(503).json({ detail: 'El panel no está configurado (ADMIN_USER / ADMIN_PASSWORD en .env).' });
+    }
+    const ip = req.ip;
+    const fails = loginFails.get(ip);
+    if (fails && fails.count >= LOGIN_MAX_FAILS && Date.now() - fails.last < LOGIN_LOCK_MS) {
+        return res.status(429).json({ detail: 'Demasiados intentos fallidos. Probá de nuevo en 15 minutos.' });
+    }
+
+    const { username = '', password = '' } = req.body || {};
+    const userOk = safeEqual(username, process.env.ADMIN_USER);
+    const passOk = safeEqual(password, process.env.ADMIN_PASSWORD);
+    if (!(userOk && passOk)) {
+        const count = fails && Date.now() - fails.last < LOGIN_LOCK_MS ? fails.count + 1 : 1;
+        loginFails.set(ip, { count, last: Date.now() });
+        return res.status(401).json({ detail: 'Usuario o contraseña incorrectos.' });
+    }
+
+    loginFails.delete(ip);
+    req.session.regenerate(err => {
+        if (err) return res.status(500).json({ detail: 'No se pudo iniciar la sesión.' });
+        req.session.admin = { usuario: process.env.ADMIN_USER };
+        res.json({ success: true });
+    });
+});
+
+app.post('/admin-auth/logout', (req, res) => {
+    delete req.session.admin;
+    res.json({ success: true });
+});
+
+// Proxy /admin-api/<ruta> -> ALERTS_API_URL/api/<ruta>, agregando la API key.
+app.use('/admin-api', checkAdmin, async (req, res) => {
+    const baseUrl = (process.env.ALERTS_API_URL || '').replace(/\/+$/, '');
+    if (!baseUrl || !process.env.ALERTS_API_KEY) {
+        return res.status(503).json({ detail: 'Falta ALERTS_API_URL / ALERTS_API_KEY en .env.' });
+    }
+    const hasBody = !['GET', 'HEAD'].includes(req.method);
+    try {
+        const upstream = await fetch(`${baseUrl}/api${req.url}`, {
+            method: req.method,
+            headers: {
+                'X-API-Key': process.env.ALERTS_API_KEY,
+                ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+            },
+            body: hasBody ? JSON.stringify(req.body ?? {}) : undefined,
+            signal: AbortSignal.timeout(120000),
+        });
+        res.status(upstream.status)
+            .type(upstream.headers.get('content-type') || 'application/json')
+            .send(Buffer.from(await upstream.arrayBuffer()));
+    } catch (err) {
+        console.error('Error llamando a la API de alertas:', err.message);
+        res.status(502).json({ detail: `La API de alertas no responde (${baseUrl}).` });
+    }
+});
 
 // --- Page Routes ---
 app.get('/', (req, res) => {

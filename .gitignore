@@ -1,1 +1,4 @@
 .env
+API/data/
+API/.venv/
+__pycache__/

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeTrack · Administración</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,-50..200" />
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="layout">
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="../assets/tracktime.webp" alt="TimeTrack">
+            </div>
+            <nav class="nav" id="nav">
+                <span class="nav-label">Administración</span>
+                <button class="nav-item active" data-view="dashboard">
+                    <span class="material-symbols-outlined">monitoring</span><span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="alertas">
+                    <span class="material-symbols-outlined">tune</span><span>Alertas</span>
+                </button>
+                <button class="nav-item" data-view="grupos">
+                    <span class="material-symbols-outlined">groups</span><span>Grupos</span>
+                </button>
+                <button class="nav-item" data-view="envios">
+                    <span class="material-symbols-outlined">outgoing_mail</span><span>Envíos</span>
+                </button>
+            </nav>
+            <div class="sidebar-foot">
+                <div class="status-list" id="status-list"></div>
+                <div class="sidebar-actions">
+                    <button class="icon-btn" id="theme-toggle" title="Cambiar tema">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                    <button class="icon-btn" id="logout" title="Cerrar sesión">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN ============ -->
+        <main class="main">
+            <!-- ---------- DASHBOARD ---------- -->
+            <section class="view active" id="view-dashboard">
+                <header class="view-head">
+                    <div>
+                        <h1>Actividad de carga de horas</h1>
+                        <p class="muted" id="dash-sub">—</p>
+                    </div>
+                    <div class="toolbar">
+                        <div class="segmented" id="period">
+                            <button data-dias="7">7 días</button>
+                            <button data-dias="30" class="active">30 días</button>
+                            <button data-dias="90">90 días</button>
+                        </div>
+                        <button class="btn ghost icon-only" id="dash-refresh" title="Actualizar">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="kpis" id="kpis"></div>
+
+                <div class="grid-charts">
+                    <article class="card span-2">
+                        <div class="card-head">
+                            <div>
+                                <h2>Personal con y sin carga por día de control</h2>
+                                <p class="muted small">Solo días de control (sin fines de semana ni feriados)</p>
+                            </div>
+                            <button class="btn ghost small" data-toggle-table="tabla-diaria">Ver tabla</button>
+                        </div>
+                        <div class="legend" id="legend-diaria"></div>
+                        <div class="chart-box tall"><canvas id="chart-diaria"></canvas></div>
+                        <div class="table-wrap hidden" id="tabla-diaria"></div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2>Días sin cargar horas</h2>
+                                <p class="muted small">Personas por días laborables desde su última carga</p>
+                            </div>
+                        </div>
+                        <div class="legend" id="legend-dist"></div>
+                        <div class="chart-box"><canvas id="chart-dist"></canvas></div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2>Horas cargadas por día</h2>
+                                <p class="muted small">Total del personal controlado</p>
+                            </div>
+                        </div>
+                        <div class="chart-box"><canvas id="chart-horas"></canvas></div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2>Estado por grupo</h2>
+                                <p class="muted small">Al día vs. inactivos (≥ umbral)</p>
+                            </div>
+                        </div>
+                        <div class="legend" id="legend-grupos"></div>
+                        <div class="chart-box"><canvas id="chart-grupos"></canvas></div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2>Horas por sector</h2>
+                                <p class="muted small">Período seleccionado</p>
+                            </div>
+                        </div>
+                        <div class="chart-box"><canvas id="chart-sectores"></canvas></div>
+                    </article>
+
+                    <article class="card span-2 flush">
+                        <div class="card-head padded">
+                            <div>
+                                <h2>Personal inactivo</h2>
+                                <p class="muted small" id="inactivos-sub">—</p>
+                            </div>
+                        </div>
+                        <div class="table-wrap" id="tabla-inactivos"></div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ---------- ALERTAS ---------- -->
+            <section class="view" id="view-alertas">
+                <header class="view-head">
+                    <div>
+                        <h1>Configuración de alertas</h1>
+                        <p class="muted">Regla de inactividad, calendario de control y mensaje</p>
+                    </div>
+                    <div class="toolbar save-bar">
+                        <span class="dirty-flag hidden">Cambios sin guardar</span>
+                        <button class="btn primary" data-save>Guardar cambios</button>
+                    </div>
+                </header>
+
+                <div class="grid-form">
+                    <article class="card">
+                        <h2 class="card-title">Regla y envío</h2>
+                        <label class="field">
+                            <span>Umbral de inactividad</span>
+                            <div class="range-row">
+                                <input type="range" id="umbral-range" min="1" max="15" step="1">
+                                <div class="number-suffix">
+                                    <input type="number" id="umbral" min="1" max="60">
+                                    <span>días laborables</span>
+                                </div>
+                            </div>
+                            <small class="muted">Se alerta cuando alguien acumula esta cantidad de días de control sin cargar horas, contando el día de hoy.</small>
+                        </label>
+                        <label class="field">
+                            <span>No repetir la alerta de una misma persona durante</span>
+                            <div class="number-suffix">
+                                <input type="number" id="no-repetir" min="0" max="30">
+                                <span>día(s) · 0 = alertar siempre</span>
+                            </div>
+                        </label>
+                        <label class="field">
+                            <span>Hora de envío</span>
+                            <input type="time" id="hora-envio" step="60" class="w-auto">
+                            <small class="muted" id="proximo-envio"></small>
+                        </label>
+                    </article>
+
+                    <article class="card">
+                        <h2 class="card-title">Días de control</h2>
+                        <div class="field">
+                            <span>Días de la semana que se controlan</span>
+                            <div class="day-chips" id="day-chips"></div>
+                        </div>
+                        <label class="check-row">
+                            <input type="checkbox" id="excluir-nacionales">
+                            <span>Excluir feriados nacionales (Argentina)</span>
+                        </label>
+                        <div class="field">
+                            <span>Días no laborables adicionales <small class="muted">(puentes, asuetos, vacaciones)</small></span>
+                            <div class="inline-form">
+                                <input type="date" id="feriado-fecha">
+                                <input type="text" id="feriado-desc" placeholder="Descripción" maxlength="120">
+                                <button class="btn ghost" id="feriado-add">Agregar</button>
+                            </div>
+                            <ul class="chip-list" id="feriados-extra"></ul>
+                        </div>
+                        <details class="upcoming">
+                            <summary>Próximos feriados en días de control</summary>
+                            <ul id="proximos-feriados" class="plain-list"></ul>
+                        </details>
+                    </article>
+
+                    <article class="card span-2">
+                        <h2 class="card-title">Mensaje de alerta</h2>
+                        <div class="msg-grid">
+                            <div>
+                                <label class="field">
+                                    <span>Asunto</span>
+                                    <input type="text" id="asunto" maxlength="200">
+                                </label>
+                                <label class="field">
+                                    <span>Mensaje por persona</span>
+                                    <textarea id="mensaje" rows="6" maxlength="2000"></textarea>
+                                </label>
+                                <div class="field">
+                                    <span>Insertar dato <small class="muted">(se agrega en la posición del cursor)</small></span>
+                                    <div class="placeholder-chips" id="placeholders"></div>
+                                </div>
+                                <p class="muted small">Se envía un email por grupo a sus encargados. Cada persona aparece
+                                    con su <strong>nombre completo</strong> y <strong>DNI</strong> destacados, además de este mensaje.</p>
+                            </div>
+                            <div class="preview">
+                                <div class="preview-head">Vista previa · datos de ejemplo</div>
+                                <div class="preview-subject" id="preview-asunto">—</div>
+                                <iframe id="preview-frame" title="Vista previa del email" sandbox=""></iframe>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ---------- GRUPOS ---------- -->
+            <section class="view" id="view-grupos">
+                <header class="view-head">
+                    <div>
+                        <h1>Grupos y encargados</h1>
+                        <p class="muted">Cada grupo recibe un email con sus integrantes inactivos</p>
+                    </div>
+                    <div class="toolbar save-bar">
+                        <span class="dirty-flag hidden">Cambios sin guardar</span>
+                        <button class="btn ghost" id="grupo-add">Nuevo grupo</button>
+                        <button class="btn primary" data-save>Guardar cambios</button>
+                    </div>
+                </header>
+
+                <div class="notice" id="sin-grupo-notice"></div>
+                <div class="groups" id="groups"></div>
+
+                <div class="grid-form">
+                    <article class="card">
+                        <h2 class="card-title">Sin grupo</h2>
+                        <p class="muted small">Destinatarios para el personal que no pertenece a ningún grupo.</p>
+                        <div class="email-input" id="emails-defecto"></div>
+                    </article>
+                    <article class="card">
+                        <h2 class="card-title">Excluidos del control</h2>
+                        <p class="muted small">Personal que nunca genera alertas (directivos, administración, etc.).</p>
+                        <div class="member-summary" id="excluidos-summary"></div>
+                        <button class="btn ghost small" id="excluidos-edit">Editar excluidos</button>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ---------- ENVÍOS ---------- -->
+            <section class="view" id="view-envios">
+                <header class="view-head">
+                    <div>
+                        <h1>Envíos</h1>
+                        <p class="muted">Disparo manual, pruebas e historial</p>
+                    </div>
+                </header>
+
+                <div class="grid-form">
+                    <article class="card">
+                        <h2 class="card-title">Disparo manual</h2>
+                        <p class="muted small">Evalúa la regla guardada ahora mismo. La simulación no envía emails ni registra historial.</p>
+                        <label class="check-row">
+                            <input type="checkbox" id="forzar">
+                            <span>Forzar <small class="muted">(ignora día no laborable y la regla de no repetir)</small></span>
+                        </label>
+                        <div class="btn-row">
+                            <button class="btn ghost" id="run-dry">Simular</button>
+                            <button class="btn primary" id="run-real">Enviar alertas</button>
+                        </div>
+                        <div id="run-result"></div>
+                    </article>
+                    <article class="card">
+                        <h2 class="card-title">Email de prueba</h2>
+                        <p class="muted small">Envía el mensaje configurado con datos de ejemplo para verificar el SMTP.</p>
+                        <div class="inline-form">
+                            <input type="email" id="test-to" placeholder="nombre@empresa.com">
+                            <button class="btn ghost" id="test-send">Enviar</button>
+                        </div>
+                    </article>
+
+                    <article class="card span-2 flush">
+                        <div class="card-head padded">
+                            <div>
+                                <h2>Quiénes recibirían alerta hoy</h2>
+                                <p class="muted small" id="pendientes-sub">—</p>
+                            </div>
+                            <button class="btn ghost small icon-only" id="pendientes-refresh" title="Actualizar"><span class="material-symbols-outlined">refresh</span></button>
+                        </div>
+                        <div class="table-wrap" id="tabla-pendientes"></div>
+                    </article>
+
+                    <article class="card span-2 flush">
+                        <div class="card-head padded">
+                            <div><h2>Historial de alertas</h2></div>
+                            <select id="hist-estado">
+                                <option value="">Todos los estados</option>
+                                <option value="enviado">Enviado</option>
+                                <option value="error">Error</option>
+                                <option value="sin_destinatario">Sin destinatario</option>
+                            </select>
+                        </div>
+                        <div class="table-wrap" id="tabla-historial"></div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============ LOGIN ============ -->
+    <div class="overlay" id="login-overlay">
+        <form class="dialog" id="login-form">
+            <img src="../assets/tracktime.webp" alt="TimeTrack" class="dialog-logo">
+            <h2>Administración</h2>
+            <p class="muted small">Ingresá con tu usuario de administrador.</p>
+            <label class="field"><span>Usuario</span><input type="text" id="admin-user" required autocomplete="username"></label>
+            <label class="field"><span>Contraseña</span><input type="password" id="admin-pass" required autocomplete="current-password"></label>
+            <div class="form-error hidden" id="login-error"></div>
+            <button class="btn primary block" type="submit">Ingresar</button>
+        </form>
+    </div>
+
+    <!-- ============ SELECTOR DE PERSONAL ============ -->
+    <div class="overlay hidden" id="picker-overlay">
+        <div class="dialog wide">
+            <div class="card-head">
+                <h2 id="picker-title">Integrantes</h2>
+                <button class="icon-btn" data-close-picker title="Cerrar"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="search"><span class="material-symbols-outlined">search</span><input type="search" id="picker-search" placeholder="Buscar por nombre o usuario"></div>
+            <div class="picker-tools">
+                <label class="check"><input type="checkbox" id="picker-only-free"> Solo sin grupo</label>
+                <span class="muted small" id="picker-count"></span>
+            </div>
+            <ul class="picker-list" id="picker-list"></ul>
+            <div class="btn-row end">
+                <button class="btn ghost" data-close-picker>Cancelar</button>
+                <button class="btn primary" id="picker-ok">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toasts" id="toasts"></div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
