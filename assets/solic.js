@@ -6,8 +6,8 @@ import {
 } from './app.js';
 
 const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const HORAS_RAPIDAS = [2, 4, 6, 8, 9, 10];     // las más cargadas en la base
-const PASO_MIN = 30;
+const HORAS_RAPIDAS = [1, 2, 3, 4, 6, 8];
+const PASO_MIN = 15;
 const MAX_MIN = 24 * 60;
 const DIAS_ATRAS = 7;                          // el servidor acepta hasta 7 días atrás
 const DIA_LARGO_MIN = 12 * 60;                 // aviso si el día supera esto

@@ -56,7 +56,7 @@ function renderKpis(k) {
     $('#kpis').innerHTML = [
         kpi({ label: 'Personal', value: fmtNum(k.personal_controlado),
             foot: `${fmtNum(k.sin_registros)} sin ninguna carga` }),
-        kpi({ label: 'Inactivos', value: fmtNum(k.inactivos), alert: k.inactivos > 0,
+        kpi({ label: 'Sin cargar', value: fmtNum(k.inactivos), alert: k.inactivos > 0,
             foot: `≥ ${data.umbral_dias} día(s) sin cargar` }),
         kpi({ label: 'Con carga',
             value: `${fmtNum(k.con_carga_ultimo_dia)}<small> / ${fmtNum(k.personal_controlado)}</small>`,
@@ -168,7 +168,7 @@ function renderGroups() {
     const rows = data.por_grupo;
     legend($('#legend-grupos'), [
         { label: 'Al día', color: p.series1 },
-        { label: 'Inactivos', color: p.critical },
+        { label: 'Sin cargar', color: p.critical },
     ]);
     const opts = baseOptions({ stacked: true, horizontal: true });
     draw('chart-grupos', {
@@ -177,7 +177,7 @@ function renderGroups() {
             labels: rows.map(r => r.grupo),
             datasets: [
                 barDataset('Al día', rows.map(r => r.activos), p.series1, { rounded: false, gap: true }),
-                barDataset('Inactivos', rows.map(r => r.inactivos), p.critical),
+                barDataset('Sin cargar', rows.map(r => r.inactivos), p.critical),
             ],
         },
         options: opts,
@@ -205,9 +205,9 @@ function renderSectors() {
 function renderInactiveTable() {
     const rows = data.top_inactivos;
     $('#inactivos-sub').textContent = rows.length
-        ? `${data.kpis.inactivos} persona(s) con ${data.umbral_dias} o más días laborables sin cargar horas` +
+        ? `${data.kpis.inactivos} persona(s) activa(s) con ${data.umbral_dias} o más días laborables sin cargar horas` +
           (data.kpis.inactivos > rows.length ? ` · se muestran las ${rows.length} con más días` : '')
-        : 'Todo el personal está al día.';
+        : 'Todo el personal activo está al día.';
     renderTable($('#tabla-inactivos'), [
         { label: 'Nombre', render: u => `<strong>${esc(u.nombre)}</strong>` },
         { label: 'Usuario', key: 'usuario' },

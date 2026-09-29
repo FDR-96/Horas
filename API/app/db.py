@@ -7,8 +7,9 @@ from .config import get_settings
 
 _pool: ConnectionPool | None = None
 
-# Mismo criterio que server.js para "usuario activo" (estado puede ser bool, int o texto).
-ACTIVE_FILTER = "p.estado::text IN ('true', 't', '1')"
+# Solo personal activo (public.personal.estado es boolean). Los dados de baja
+# no se evalúan, no generan alertas y no aparecen en métricas ni en grupos.
+ACTIVE_FILTER = "p.estado IS TRUE"
 
 
 def get_pool() -> ConnectionPool:
