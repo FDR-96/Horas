@@ -22,6 +22,8 @@ const ICONS = {
     eyeOff: '<path d="M3 3l18 18M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.9 8.3 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    logout: '<path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 17l5-5-5-5M21 12H9"/>',
+    trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
 };
 
 export const icon = (name, cls = '') =>
@@ -238,7 +240,7 @@ export function openListSheet({ title, searchPlaceholder = 'Buscar', render, onG
     });
 }
 
-/** Sheet con contenido libre y botones. actions: [{ id, label, primary? }] -> id elegido o null. */
+/** Sheet con contenido libre y botones. actions: [{ id, label, primary?, danger? }] -> id elegido o null. */
 export function openActionSheet({ title, body, actions }) {
     activeSheet?.close(null);
     return new Promise(resolve => {
@@ -246,7 +248,7 @@ export function openActionSheet({ title, body, actions }) {
             title,
             content: `<div class="sheet-body">${body}</div>
                 <div class="sheet-actions">${actions.map(a =>
-                    `<button type="button" class="btn btn-block ${a.primary ? 'btn-primary' : 'btn-secondary'}" data-action="${esc(a.id)}">${esc(a.label)}</button>`).join('')}
+                    `<button type="button" class="btn btn-block ${a.danger ? 'btn-danger' : a.primary ? 'btn-primary' : 'btn-secondary'}" data-action="${esc(a.id)}">${esc(a.label)}</button>`).join('')}
                 </div>`,
         });
         const close = presentSheet(root, resolve);

@@ -161,6 +161,8 @@ button { background: none; border: none; cursor: pointer; touch-action: manipula
 .btn-primary:active { background: var(--brand-press); }
 .btn-secondary { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
 .btn-secondary:active { background: var(--surface-2); }
+.btn-danger { background: var(--error); color: #fff; }
+.btn-danger:active { background: #a51f1f; }
 .btn:disabled { opacity: .6; }
 .btn-block { width: 100%; }
 
@@ -170,6 +172,63 @@ button { background: none; border: none; cursor: pointer; touch-action: manipula
     padding: 12px 16px calc(12px + var(--safe-bottom));
 }
 .action-bar-inner { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.action-bar-inner.single { grid-template-columns: 1fr; }
+
+/* ============ TABLERO ============ */
+.app-header .brand-logo { height: 34px; width: auto; display: block; margin-left: 8px; }
+.app-header .spacer { flex: 1; }
+
+.greeting { font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; margin: 4px 0 14px; }
+.greeting small { display: block; font-size: .9rem; font-weight: 500; color: var(--text-2); letter-spacing: 0; }
+
+.today-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 16px 18px; margin-bottom: 24px;
+}
+.today-card .label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); }
+.today-card .total { font-size: 2.2rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; margin: 4px 0 12px; font-variant-numeric: tabular-nums; }
+.today-card .total small { font-size: 1rem; font-weight: 500; color: var(--text-2); }
+.progress { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.progress > span { display: block; height: 100%; border-radius: 4px; background: var(--brand); transition: width .4s ease; }
+.progress.done > span { background: var(--ok); }
+.today-card .hint { font-size: .85rem; color: var(--text-2); margin-top: 8px; }
+
+.list-title {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text-2); margin: 20px 0 8px;
+}
+.list-title span:last-child { font-weight: 600; text-transform: none; letter-spacing: 0; }
+.entries { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.entry { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 6px 10px 16px; }
+.entry + .entry { border-top: 1px solid var(--surface-2); }
+.entry .t { flex: 1; min-width: 0; }
+.entry .t b { display: block; font-weight: 600; overflow-wrap: anywhere; line-height: 1.3; }
+.entry .t small { display: block; color: var(--text-2); font-size: .85rem; margin-top: 2px; }
+.entry .t small.parent {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    font-size: .8rem; color: var(--muted);
+}
+.entry .h { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 10px; }
+.entry .icon-btn { color: var(--muted); }
+.entry .icon-btn:active { color: var(--error); background: var(--error-soft); }
+.entry.removing { opacity: .4; pointer-events: none; }
+.tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: .75rem; font-weight: 600;
+       background: var(--surface-2); color: var(--text-2); margin-left: 4px; }
+.tag.warn { background: #fff4e0; color: #8a5a00; }
+.tag.bad { background: var(--error-soft); color: var(--error); }
+
+.empty-state { text-align: center; padding: 28px 20px; color: var(--text-2);
+               background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
+.empty-state b { display: block; color: var(--text); font-size: 1.05rem; margin-bottom: 4px; }
+
+.skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, #e8e7e3 50%, var(--surface-2) 75%);
+            background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; color: transparent !important; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+.brand-footer { display: flex; justify-content: center; align-items: center; gap: 28px; margin-top: 36px; opacity: .8; }
+.brand-footer img { height: 28px; width: auto; }
 
 /* ============ BOTTOM SHEET ============ */
 .sheet-backdrop {
