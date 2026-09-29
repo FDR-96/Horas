@@ -22,6 +22,7 @@ const PRECACHE = [
     '/assets/login.js',
     '/assets/dash.js',
     '/assets/solic.js',
+    '/assets/install.js',
     '/assets/icons/icon.svg',
     '/assets/icons/icon-white.svg',
     '/assets/icons/tt-glyph.svg',

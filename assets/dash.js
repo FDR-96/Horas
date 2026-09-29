@@ -1,6 +1,7 @@
 // Tablero del empleado. Mismos endpoints que la versión anterior:
 // GET /api/user, GET /api/solicitudes, GET /api/horas-hoy?fecha, DELETE /api/solicitudes/:id, POST /logout.
 import { $, api, esc, fmtMinutes, icon, intervalToMinutes, isoLocal, openActionSheet, toast } from './app.js';
+import { invitarAInstalar } from './install.js';
 
 // Referencia para la barra del día: 8 h es la carga más frecuente en la base.
 const JORNADA_MIN = 8 * 60;
@@ -191,6 +192,7 @@ function refrescar() {
 
 cargarUsuario();
 refrescar();
+invitarAInstalar();
 // Al volver desde "Cargar horas" con el botón atrás, el navegador puede restaurar
 // la página desde caché: se actualizan los datos.
 window.addEventListener('pageshow', e => { if (e.persisted) refrescar(); });

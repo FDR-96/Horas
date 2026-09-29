@@ -313,6 +313,29 @@ button { background: none; border: none; cursor: pointer; touch-action: manipula
 .result h3 { font-size: 1.25rem; font-weight: 700; }
 .result p { color: var(--text-2); margin-top: 6px; }
 
+/* ============ INVITACIÓN A INSTALAR (assets/install.js) ============ */
+.install { text-align: center; padding-top: 4px; }
+.install-icon {
+    width: 72px; height: 72px; display: block; margin: 0 auto 14px;
+    border-radius: 18px; box-shadow: 0 8px 22px rgb(242 103 34 / .28);
+}
+.install h3 { font-size: 1.2rem; font-weight: 700; }
+.install > p { color: var(--text-2); margin-top: 6px; }
+.install-list { list-style: none; text-align: left; margin: 18px 0 4px; display: grid; gap: 10px; }
+.install-list li { display: flex; gap: 12px; align-items: center; font-size: .95rem; }
+.install-list .icon { width: 20px; height: 20px; color: var(--ok); }
+.install-steps { list-style: none; text-align: left; margin: 18px 0 4px; display: grid; gap: 10px; counter-reset: paso; }
+.install-steps li {
+    display: flex; gap: 12px; align-items: center; counter-increment: paso;
+    padding: 12px 14px; border-radius: var(--radius); background: var(--surface-2); font-size: .95rem;
+}
+.install-steps li::before {
+    content: counter(paso); flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--brand); color: #fff; font-weight: 700; font-size: .85rem;
+}
+.install-steps .icon { width: 20px; height: 20px; color: var(--brand); vertical-align: -4px; }
+
 /* ============ LOGIN ============ */
 .login-page {
     background:
