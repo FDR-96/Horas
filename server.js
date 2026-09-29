@@ -4,6 +4,7 @@ const session = require('express-session');
 const { Pool } = require('pg');
 const path = require('path');
 const crypto = require('crypto');
+const compression = require('compression');
 
 // --- Configuración (.env en la raíz, no versionado) ---
 try {
@@ -32,6 +33,7 @@ const pool = new Pool({
 });
 
 // --- Middleware ---
+app.use(compression()); // gzip para HTML, JS, CSS y JSON (la lista de obras baja ~70%)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
@@ -294,26 +296,24 @@ app.get('/api/obras-jerarquia', checkAuth, async (req, res) => {
         const result = await pool.query(query);
         const obras = result.rows;
         const hierarchy = [];
-        const map = {};
+        const raices = {};
 
-        // 1. Mapear todos los objetos
+        // En public.obras hay id_sistema repetidos entre una obra raíz y una subobra
+        // de otra obra. Cada fila es un nodo propio: solo las raíces se indexan por id
+        // (son las únicas que pueden ser padre; la jerarquía tiene dos niveles).
         obras.forEach(o => {
-            map[o.id_sistema] = { ...o, subobras: [] };
+            if (o.parent_id === null || o.parent_id === 0) {
+                const nodo = { ...o, subobras: [] };
+                raices[o.id_sistema] = nodo;
+                hierarchy.push(nodo);
+            }
         });
 
-        // 2. Construir la estructura
         obras.forEach(o => {
             const esRaiz = o.parent_id === null || o.parent_id === 0;
-
-            if (!esRaiz) {
-                // Si tiene un padre y el padre existe en nuestro mapa activo
-                if (map[o.parent_id]) {
-                    map[o.parent_id].subobras.push(map[o.id_sistema]);
-                }
-                // Si el padre NO existe (está en false o no está en la lista), 
-                // NO lo pusheamos a hierarchy para evitar que aparezca como raíz.
-            } else {
-                hierarchy.push(map[o.id_sistema]);
+            // Si el padre no existe (inactivo), la subobra no se muestra.
+            if (!esRaiz && raices[o.parent_id]) {
+                raices[o.parent_id].subobras.push({ ...o, subobras: [] });
             }
         });
 
@@ -368,7 +368,7 @@ app.get('/api/horas-hoy', checkAuth, async (req, res) => {
 
 // Submit a new hour request
 app.post('/api/solicitar', checkAuth, async (req, res) => {
-    const { obra: obraId, sector, fecha, horas, razon, comentarios } = req.body;
+    const { obra: obraId, obraPadre, sector, fecha, horas, razon } = req.body;
     const personalId = req.session.user.id;
 
     // Basic validation
@@ -393,13 +393,23 @@ app.post('/api/solicitar', checkAuth, async (req, res) => {
     }
 
     try {
-        // Determine if the selected obra is a subobra
-        const obraResult = await pool.query('SELECT parent_id FROM public.obras WHERE id_sistema = $1 AND estado = true', [obraId]);
-        if (obraResult.rows.length === 0) {
+        // Determinar si la obra elegida es una subobra. Hay id_sistema repetidos entre
+        // una raíz y una subobra de otra obra: `obraPadre` (0 = raíz) indica cuál se
+        // eligió. Sin ese dato (pantalla anterior) se usa la raíz, como en las cargas
+        // históricas de esos ids.
+        const obraResult = await pool.query(
+            'SELECT COALESCE(parent_id, 0) AS parent_id FROM public.obras WHERE id_sistema = $1 AND estado = true ORDER BY COALESCE(parent_id, 0)',
+            [obraId]
+        );
+        let fila = obraResult.rows[0];
+        if (obraPadre !== undefined && obraPadre !== null && obraPadre !== '') {
+            fila = obraResult.rows.find(r => Number(r.parent_id) === Number(obraPadre));
+        }
+        if (!fila) {
             return res.status(400).json({ message: 'La obra seleccionada no es válida.' });
         }
 
-        const parentId = obraResult.rows[0].parent_id;
+        const parentId = Number(fila.parent_id);
         const finalObraId = parentId || obraId;
         const subObraId = parentId ? obraId : 0;
 
