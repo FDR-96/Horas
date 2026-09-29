@@ -46,7 +46,6 @@ const qs = params => {
 
 export const auth = {
     session: () => request('GET', '/admin-auth/session', undefined, { authCheck: false }),
-    login: (username, password) => request('POST', '/admin-auth/login', { username, password }, { authCheck: false }),
     logout: () => request('POST', '/admin-auth/logout', {}, { authCheck: false }),
 };
 

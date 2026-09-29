@@ -105,52 +105,23 @@ async function boot() {
     loadDashboard();
 }
 
-function showLogin(message) {
-    $('#login-error').textContent = message || '';
-    $('#login-error').classList.toggle('hidden', !message);
-    $('#login-overlay').classList.remove('hidden');
-    ($('#admin-user').value ? $('#admin-pass') : $('#admin-user')).focus();
-}
-
-async function enter() {
-    try {
-        await boot();
-        $('#login-overlay').classList.add('hidden');
-    } catch (err) {
-        // 401 ya abrió el login; otros errores (API caída, etc.) se muestran ahí mismo.
-        showLogin(err.status === 401 ? '' : err.message);
-    }
-}
-
-// Si la sesión vence mientras se usa el panel, se vuelve a pedir el login.
-setUnauthorizedHandler(() => showLogin('Tu sesión expiró. Ingresá de nuevo.'));
-
-$('#login-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn = e.submitter || $('#login-form button');
-    await withBusy(btn, async () => {
-        try {
-            await auth.login($('#admin-user').value.trim(), $('#admin-pass').value);
-            $('#admin-pass').value = '';
-            await enter();
-        } catch (err) {
-            showLogin(err.message);
-        }
-    });
-});
+// El acceso es único: login.html. Sin sesión (o si vence) se vuelve ahí.
+const irAlLogin = () => location.replace('/login.html');
+setUnauthorizedHandler(irAlLogin);
 
 $('#logout').addEventListener('click', async () => {
     if (isDirty() && !confirm('Hay cambios sin guardar. ¿Cerrar sesión igual?')) return;
-    try { await auth.logout(); } catch { /* igual se recarga */ }
-    location.reload();
+    try { await auth.logout(); } catch { /* igual se sale */ }
+    irAlLogin();
 });
 
 (async () => {
     try {
         const s = await auth.session();
-        if (s.authenticated) await enter();
-        else showLogin();
+        if (!s.authenticated) { irAlLogin(); return; }
+        await boot();
     } catch (err) {
-        showLogin(err.message);
+        if (err.status === 401) return; // ya redirigió
+        toast(err.message, 'error');
     }
 })();

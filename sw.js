@@ -12,10 +12,10 @@ const VERSION = '__VERSION__';
 const SHELL_CACHE = `tt-shell-${VERSION}`;
 const FONT_CACHE = 'tt-fonts-v1';
 
+// Solo archivos públicos: las páginas de empleados requieren sesión y se
+// guardan la primera vez que se abren con sesión válida (ver PROTECTED_PAGES).
 const PRECACHE = [
     '/login.html',
-    '/empleado_dash.html',
-    '/empleado_solic.html',
     '/manifest.json',
     '/assets/app.css',
     '/assets/app.js',
@@ -75,13 +75,32 @@ self.addEventListener('fetch', event => {
 
     if (request.mode === 'navigate') {
         const page = PAGES[url.pathname];
-        if (page) event.respondWith(fromShell(page, request));
+        if (!page) return;
+        event.respondWith(PROTECTED_PAGES.has(page) ? protectedPage(page, request) : fromShell(page, request));
         return;
     }
     if (PRECACHE.includes(url.pathname)) {
         event.respondWith(fromShell(url.pathname, request));
     }
 });
+
+// Páginas con sesión: se muestra la copia guardada al instante (es solo la
+// interfaz; los datos llegan por /api y el servidor valida la sesión) y en
+// paralelo se pide a la red para actualizarla. Solo se guarda una respuesta
+// 200 real: una redirección al login nunca queda en caché.
+const PROTECTED_PAGES = new Set(['/empleado_dash.html', '/empleado_solic.html']);
+
+async function protectedPage(key, request) {
+    const cache = await caches.open(SHELL_CACHE);
+    const hit = await cache.match(key);
+    const network = fetch(request)
+        .then(res => {
+            if (res.ok && !res.redirected && res.type === 'basic') cache.put(key, res.clone());
+            return res;
+        })
+        .catch(() => hit || Response.error());
+    return hit || network;
+}
 
 async function fromShell(key, request) {
     const cache = await caches.open(SHELL_CACHE);
