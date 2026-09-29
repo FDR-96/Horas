@@ -45,7 +45,9 @@ def apply(cfg: AlertConfig) -> None:
     hh, mm = cfg.hora_envio.split(":")
     # Corre todos los días; run_alerts decide si hoy es día de control
     # (así los feriados se respetan sin reprogramar).
-    _scheduler.add_job(_job, CronTrigger(hour=int(hh), minute=int(mm)), id=JOB_ID,
+    # La zona va explícita: CronTrigger usa la del sistema por defecto (UTC en el servidor).
+    trigger = CronTrigger(hour=int(hh), minute=int(mm), timezone=get_settings().timezone)
+    _scheduler.add_job(_job, trigger, id=JOB_ID,
                        misfire_grace_time=3600, coalesce=True, replace_existing=True)
 
 
