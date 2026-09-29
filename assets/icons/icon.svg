@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TimeTrack">
+  <rect width="512" height="512" rx="112" fill="#F26722"/>
+  <!-- TT entrelazadas: la segunda T lleva un borde del color de fondo que marca el cruce -->
+  <path d="M104 100H304V160H234V356H174V160H104Z" fill="#fff"/>
+  <path d="M208 156H408V216H338V412H278V216H208Z" fill="#fff" stroke="#F26722" stroke-width="26" stroke-linejoin="round" paint-order="stroke"/>
+</svg>

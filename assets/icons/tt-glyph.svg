@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 80 352 352">
+  <!-- Solo el dibujo TT en blanco (marca de agua del login) -->
+  <path d="M104 100H304V160H234V356H174V160H104Z" fill="#fff"/>
+  <path d="M208 156H408V216H338V412H278V216H208Z" fill="#fff"/>
+</svg>

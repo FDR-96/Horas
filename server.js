@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const { Pool } = require('pg');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const compression = require('compression');
 
@@ -46,6 +47,27 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false } // For development. Set to true if using HTTPS in production
 }));
+
+// --- Service worker (app de empleados) ---
+// Se sirve con la versión = hash de los archivos de la interfaz. Así cualquier
+// cambio desplegado con git pull (incluso sin reiniciar) actualiza la caché de
+// los teléfonos, sin tener que acordarse de subir un número de versión.
+const SW_FILES = ['sw.js', 'manifest.json', 'login.html', 'empleado_dash.html', 'empleado_solic.html'];
+const listarArchivos = dir => fs.readdirSync(path.join(__dirname, dir), { withFileTypes: true })
+    .flatMap(e => (e.isDirectory() ? listarArchivos(path.join(dir, e.name)) : [path.join(dir, e.name)]));
+
+app.get('/sw.js', (req, res, next) => {
+    try {
+        const hash = crypto.createHash('sha1');
+        [...SW_FILES, ...listarArchivos('assets')].sort()
+            .forEach(f => hash.update(f).update(fs.readFileSync(path.join(__dirname, f))));
+        const src = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8')
+            .replace("'__VERSION__'", `'${hash.digest('hex').slice(0, 12)}'`);
+        res.set({ 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-cache' }).send(src);
+    } catch (err) {
+        next(err);
+    }
+});
 
 // Serve static files from the root directory.
 // Nunca servir archivos bajo /api/ (en cualquier capitalización): ahí vive la API

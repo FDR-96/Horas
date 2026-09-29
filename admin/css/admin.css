@@ -102,8 +102,10 @@ strong { font-weight: 600; }
     height: 100vh;
 }
 
-.brand { padding: 0 20px 24px; }
-.brand img { height: 30px; display: block; }
+.brand { padding: 0 20px 24px; display: flex; align-items: center; gap: 9px; }
+.brand-icon { width: 28px; height: 28px; display: block; flex-shrink: 0; }
+.brand-word { font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; }
+.brand-word b { color: var(--brand); font-weight: 700; }
 
 .nav { display: flex; flex-direction: column; }
 .nav-label {
@@ -355,7 +357,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 .dialog.wide { max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; gap: 12px; }
 .dialog h2 { font-size: 1.05rem; }
-.dialog-logo { height: 30px; margin-bottom: 20px; display: block; }
+.brand.dialog-logo { padding: 0; margin-bottom: 20px; }
 .dialog > .muted { margin: 2px 0 20px; }
 .form-error { color: var(--status-critical); font-size: .82rem; margin-bottom: 12px; }
 .picker-tools { display: flex; justify-content: space-between; align-items: center; }
@@ -395,7 +397,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
         border-right: none; border-bottom: 1px solid var(--border);
     }
     .brand { padding: 0; }
-    .brand img { height: 24px; }
+    .brand-word { display: none; }
     .nav { flex-direction: row; flex: 1; justify-content: center; }
     .nav-label { display: none; }
     .nav-item { padding: 14px 12px; border-left: none; border-bottom: 2px solid transparent; }

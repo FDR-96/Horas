@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#f6f6f4">
     <title>TimeTrack · Mis horas</title>
-    <link rel="icon" href="data:,">
+    <link rel="icon" href="/assets/icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="TimeTrack">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
     <link rel="stylesheet" href="/assets/app.css">
 </head>
 <body>
     <header class="app-header">
-        <img src="/assets/tracktime.webp" alt="TimeTrack" class="brand-logo" width="120" height="34">
+        <div class="brand">
+            <img src="/assets/icons/icon.svg" alt="" class="brand-icon" width="32" height="32">
+            <span class="brand-word">Time<b>Track</b></span>
+        </div>
         <span class="spacer"></span>
         <button type="button" class="icon-btn" id="logout" aria-label="Cerrar sesión"></button>
     </header>
@@ -31,11 +38,6 @@
         </section>
 
         <div id="entries" aria-live="polite"></div>
-
-        <footer class="brand-footer">
-            <img src="/assets/Logo.webp" alt="Albace" width="96" height="28" loading="lazy">
-            <img src="/assets/AxuraLogo.png" alt="Axura" width="96" height="28" loading="lazy">
-        </footer>
     </main>
 
     <div class="action-bar">

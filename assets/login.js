@@ -58,5 +58,5 @@ form.addEventListener('submit', async e => {
         showError('Sin conexión con el servidor. Revisá tu señal e intentá de nuevo.');
     }
     submit.disabled = false;
-    submit.textContent = 'Iniciar sesión';
+    submit.textContent = 'Ingresar';
 });

@@ -1,5 +1,13 @@
 // TimeTrack · utilidades compartidas de la app de empleados (sin dependencias).
 
+// Service worker: caché de la interfaz para abrir al instante (ver /sw.js).
+// Los navegadores solo lo permiten en HTTPS o localhost.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.warn('Service worker no registrado:', err));
+    });
+}
+
 export const $ = (sel, root = document) => root.querySelector(sel);
 
 export function esc(value) {

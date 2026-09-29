@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TimeTrack · Administración</title>
+    <link rel="icon" href="../assets/icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="../assets/icons/favicon-32.png" sizes="32x32" type="image/png">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -19,7 +21,8 @@
         <!-- ============ SIDEBAR ============ -->
         <aside class="sidebar">
             <div class="brand">
-                <img src="../assets/tracktime.webp" alt="TimeTrack">
+                <img src="../assets/icons/icon.svg" alt="" class="brand-icon" width="28" height="28">
+                <span class="brand-word">Time<b>Track</b></span>
             </div>
             <nav class="nav" id="nav">
                 <span class="nav-label">Administración</span>
@@ -330,7 +333,10 @@
     <!-- ============ LOGIN ============ -->
     <div class="overlay" id="login-overlay">
         <form class="dialog" id="login-form">
-            <img src="../assets/tracktime.webp" alt="TimeTrack" class="dialog-logo">
+            <div class="brand dialog-logo">
+                <img src="../assets/icons/icon.svg" alt="" class="brand-icon" width="28" height="28">
+                <span class="brand-word">Time<b>Track</b></span>
+            </div>
             <h2>Administración</h2>
             <p class="muted small">Ingresá con tu usuario de administrador.</p>
             <label class="field"><span>Usuario</span><input type="text" id="admin-user" required autocomplete="username"></label>
