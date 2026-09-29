@@ -94,10 +94,32 @@ const safeEqual = (a, b) => crypto.timingSafeEqual(
     crypto.createHash('sha256').update(String(b)).digest()
 );
 
-// Bloqueo simple por IP: 5 intentos fallidos -> 15 minutos.
+// Bloqueo simple por IP de los intentos contra la cuenta de administrador
+// (panel y login.html comparten el contador): 5 fallos -> 15 minutos.
 const loginFails = new Map();
 const LOGIN_MAX_FAILS = 5;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
+
+const adminLocked = ip => {
+    const f = loginFails.get(ip);
+    return Boolean(f && f.count >= LOGIN_MAX_FAILS && Date.now() - f.last < LOGIN_LOCK_MS);
+};
+const adminFailed = ip => {
+    const f = loginFails.get(ip);
+    const count = f && Date.now() - f.last < LOGIN_LOCK_MS ? f.count + 1 : 1;
+    loginFails.set(ip, { count, last: Date.now() });
+};
+const isAdminUser = username => adminConfigured() && safeEqual(username, process.env.ADMIN_USER);
+const isAdminPassword = password => adminConfigured() && safeEqual(password, process.env.ADMIN_PASSWORD);
+
+/** Sesión nueva (evita fijación de sesión) marcada como administrador. */
+function startAdminSession(req, ip, done) {
+    loginFails.delete(ip);
+    req.session.regenerate(err => {
+        if (!err) req.session.admin = { usuario: process.env.ADMIN_USER };
+        done(err);
+    });
+}
 
 const checkAdmin = (req, res, next) => {
     if (req.session.admin) return next();
@@ -113,24 +135,20 @@ app.post('/admin-auth/login', (req, res) => {
         return res.status(503).json({ detail: 'El panel no está configurado (ADMIN_USER / ADMIN_PASSWORD en .env).' });
     }
     const ip = req.ip;
-    const fails = loginFails.get(ip);
-    if (fails && fails.count >= LOGIN_MAX_FAILS && Date.now() - fails.last < LOGIN_LOCK_MS) {
+    if (adminLocked(ip)) {
         return res.status(429).json({ detail: 'Demasiados intentos fallidos. Probá de nuevo en 15 minutos.' });
     }
 
     const { username = '', password = '' } = req.body || {};
-    const userOk = safeEqual(username, process.env.ADMIN_USER);
-    const passOk = safeEqual(password, process.env.ADMIN_PASSWORD);
+    const userOk = isAdminUser(username);
+    const passOk = isAdminPassword(password);
     if (!(userOk && passOk)) {
-        const count = fails && Date.now() - fails.last < LOGIN_LOCK_MS ? fails.count + 1 : 1;
-        loginFails.set(ip, { count, last: Date.now() });
+        adminFailed(ip);
         return res.status(401).json({ detail: 'Usuario o contraseña incorrectos.' });
     }
 
-    loginFails.delete(ip);
-    req.session.regenerate(err => {
+    startAdminSession(req, ip, err => {
         if (err) return res.status(500).json({ detail: 'No se pudo iniciar la sesión.' });
-        req.session.admin = { usuario: process.env.ADMIN_USER };
         res.json({ success: true });
     });
 });
@@ -190,25 +208,40 @@ app.post('/login', async (req, res) => {
         return res.status(400).json({ success: false, message: 'Usuario y contraseña son requeridos.' });
     }
 
+    // Credenciales de administrador (.env): entra directo al panel de administración.
+    const ip = req.ip;
+    const esUsuarioAdmin = isAdminUser(username);
+    if (esUsuarioAdmin) {
+        if (adminLocked(ip)) {
+            return res.status(429).json({ success: false, message: 'Demasiados intentos fallidos. Probá de nuevo en 15 minutos.' });
+        }
+        if (isAdminPassword(password)) {
+            return startAdminSession(req, ip, err => {
+                if (err) return res.status(500).json({ success: false, message: 'No se pudo iniciar la sesión.' });
+                res.json({ success: true, redirect: '/admin/' });
+            });
+        }
+        // Si no es la clave del admin, puede ser un empleado con ese mismo usuario: se sigue.
+    }
+
     try {
         const query = 'SELECT id_sistema, nombre, usuario, rol, estado FROM public.personal WHERE usuario = $1 AND dni = $2';
         const result = await pool.query(query, [username, password]);
-        console.log('Resultado de la consulta de login:', result.rows);
         if (result.rows.length > 0) {
             const user = result.rows[0];
+            if (!(user.estado == true || user.estado === 'true' || user.estado === 't' || user.estado === 1)) {
+                // Sin sesión: antes quedaba logueado aunque se le respondiera "inactivo".
+                return res.status(403).json({ success: false, message: 'Usuario inactivo. Contacte al administrador.' });
+            }
             req.session.user = {
                 id: user.id_sistema,
                 nombre: user.nombre,
                 usuario: user.usuario,
                 rol: user.rol
             };
-
-            if (user.estado == true || user.estado === 'true' || user.estado === 't' || user.estado === 1) {
-                res.json({ success: true });
-            } else {
-                res.status(403).json({ success: false, message: 'Usuario inactivo. Contacte al administrador.' });
-            }
+            res.json({ success: true });
         } else {
+            if (esUsuarioAdmin) adminFailed(ip);
             res.status(401).json({ success: false, message: 'Credenciales incorrectas.' });
         }
     } catch (error) {

@@ -50,7 +50,8 @@ form.addEventListener('submit', async e => {
         });
         const result = await res.json().catch(() => ({}));
         if (res.ok && result.success) {
-            location.href = '/dashboard';
+            // El servidor indica adónde ir (p. ej. /admin/ para el administrador).
+            location.href = result.redirect || '/dashboard';
             return;
         }
         showError(result.message || 'No se pudo iniciar sesión.');
