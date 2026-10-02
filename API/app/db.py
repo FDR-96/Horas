@@ -7,9 +7,11 @@ from .config import get_settings
 
 _pool: ConnectionPool | None = None
 
-# Solo personal activo (public.personal.estado es boolean). Los dados de baja
-# no se evalúan, no generan alertas y no aparecen en métricas ni en grupos.
-ACTIVE_FILTER = "p.estado IS TRUE"
+# Personal que se controla: activo (public.personal.estado es boolean) y con
+# usuario cargado. Sin usuario no puede iniciar sesión ni cargar horas, así que
+# controlarlo solo generaría alertas falsas. Los que no cumplen no se evalúan,
+# no generan alertas y no aparecen en métricas ni en grupos.
+ACTIVE_FILTER = "p.estado IS TRUE AND NULLIF(BTRIM(p.usuario), '') IS NOT NULL"
 
 
 def get_pool() -> ConnectionPool:
